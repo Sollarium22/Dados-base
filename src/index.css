@@ -9,43 +9,71 @@ body {
 }
 
 body {
-    min-height: 100vh; /* Ocupa a altura total da tela */
+   
     display: flex;
     justify-content: center; /* Centraliza o #DADO horizontalmente */
     align-items: center; /* Centraliza o #DADO verticalmente */
-    position: relative; /* Base de referência para o botão absoluto */
-    overflow: hidden;
+  
+  
 }
 
-#dado {
-  font-size: calc(10px + 2vmin);
-  color: white;
 
+
+.jogo {
+  display:flex;
+  justify-content: space-between;
+  width: 90%;
+  align-items: flex-start;
+  margin: 0 auto;
+  gap: 40px;
 }
-#nerd {
-  top: 20px; /* Distância do topo */
-  right: 20px; /* Distância da direita */
-  background: blueviolet;
-  font-size: 40px;
+
+.secao-dado{
+  flex:1;
+  text-align: center;
+}
+
+.lado-direito{
+  display: flex;
+  flex-direction: column;
+}
+
+.secao-upgrade{
+  width: 200px;
+  text-align: left;
+  background-color: antiquewhite;
   padding: 20px;
   border-radius: 20px;
-  border: 5px;
+  border: 4px solid #282c34;
+  box-shadow: 0 0 15px #000;
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #fff;
 }
 
-.menu-lateral {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    max-height: 80vh; /* Ocupa no máximo 80% da altura da tela */
-    display: flex;
-    flex-direction: column; /* Organiza os botões em coluna */
-    gap: 10px; /* Espaçamento entre os botões */
-    overflow-y: auto; /* Ativa a barra de rolagem vertical quando necessário */
-    padding-right: 5px; /* Espaço para a barra de rolagem não cobrir o texto */
+
+.secao-construcao{
+  width: 200px;
+  text-align: left;
+  background-color: antiquewhite;
+  padding: 20px;
+  border-radius: 20px;
+  border: 4px solid #282c34;
+  box-shadow: 0 0 15px #000;
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #fff;
 }
 
-.menu-lateral button {
-     padding: 10px 20px;
+.secao-construcao img {
+  height: 50px;
+  width: 50px;
+}
+
+.secao-construcao button {
+    padding: 10px 20px;
     font-size: 14px;
     background-color: #2ed573;
     color: white;
@@ -56,7 +84,7 @@ body {
     font-size: 20px;
 }
 
-.menu-lateral img {
-  height: 50px;
-  width: 50px;
+.secao-construcao h2 {
+  text-align: center;
+  margin-bottom: 20px;
 }
