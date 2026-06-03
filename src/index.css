@@ -53,4 +53,10 @@ body {
     border-radius: 3px;
     cursor: pointer;
     white-space: nowrap;
+    font-size: 20px;
+}
+
+.menu-lateral img {
+  height: 50px;
+  width: 50px;
 }
