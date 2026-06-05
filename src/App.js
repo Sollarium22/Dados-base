@@ -1,13 +1,15 @@
 import logo from './logo.svg';
 import './App.css';
 import { useState, useEffect } from 'react';
-import dado from './d4.png'
-import dodo from './dodo.png'
+import dado from './d4.png';
+import dodo from './dodo.png';
+import { motion, useAnimation} from 'framer-motion';
 
 
 function App() {
 
-  const [contagem, setContagem] = useState(1010); // total de dados
+  
+  const [contagem, setContagem] = useState(0); // total de dados
   const [DPS, setDps] = useState(0); // total de Dados por segundo Dps
   const [click, setClick] = useState(1); // clic
   const [preco, setPreco] = useState(15);// preco
@@ -25,6 +27,9 @@ function App() {
 
   ])
 
+  //os numeros
+  const [numeirinhos, setNumeirinhos] = useState([]);
+
   function contarDado(){
     setContagem(contagem + click);
 
@@ -32,12 +37,18 @@ function App() {
 
   // EFEITO DE UPGRADES
     useEffect(() => {
+
+      //Multiplicadores comparar quantos tem
       const multiplicador = upgrade.filter(u => u.efeito === "duplicarClick" && u.comprado).length;
+      const mult_dado = upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length;
+
+      // calculo de multiplicador
       const novoClick = 1 * (2 ** multiplicador);
+      const novoDado = 0.5 * (2 ** mult_dado);
       setClick(novoClick);
 
-      const mult_dado = upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length;
-      const novoDado = 0.5 * (2 ** mult_dado);
+      
+      
       setConstrucoes((anterior) =>
         anterior.map((c) => {
           if(c.nome === "Dado"){
@@ -49,7 +60,6 @@ function App() {
 
     }, [upgrade])
     
-
    
 
   // TEMPO DO JOGO
@@ -114,22 +124,88 @@ function comprarUpgrade(indice) {
       return true;
     });
 
+
+
      //lista de comprados:
     const upgradeComprados = upgrade.filter((u) => u.comprado)
 
+    //=================ANIMACAO DADO=========================
+    const controls = useAnimation();
+    const Clicar = (e) => {
+      //pega o horario atual
+      const id = Date.now();
+      //posicao do mouse
+      const x = e.clientX - 20;
+      const y = e.clientY - 20;
+      //seta o id, e posicoes
+      setNumeirinhos((prev) => [...prev, {id,x,y}]);
+
+      //faz a animacao no cookie quando clica
+      controls.start({
+      scale: [1, 0.9, 1.1, 1], //faz ele aumentar e diminuir
+      transition: { duration: 0.3, ease: "easeOut"} // faz ele faer isto em 0.3 segundos
+    });
+    contarDado(); // conta o dados
+    setTimeout(() => {
+      setNumeirinhos((prev) => prev.filter((t) => t.id !== id)); // faz os numeirinhos sumirem
+    }, 1000) // define para eles ficarem por 1 segundo
+    };
 
 
 
+
+// HTML
   return (
     <div className="App">
       <div className="jogo">
         <div class="secao-dado">
+
           <h1>Dado Clicker</h1>
           <h2>Total de numeros: {Math.floor(contagem)}</h2>
           <h3>DPS: {DPS.toFixed(1)}</h3>
-        <button id="dado" onClick={contarDado}><img src={dado} className="App-logo" alt="logo"style={{cursor: "pointer"}}/> </button>
+          <motion.img
+            id="dadoP"
+            src={dado}
+            onClick={Clicar}
+            animate={controls}
+            WhileHover={{
+              scale: 1.1,
+              filter: "brightness(1.1)",
+              transition: {duration: 0.3, repeat: Infinity, repeatType: "reverse"},
+            }}
+
+            style={{ width: "400px", cursor: "pointer", borderRadius: "50%", userSelect: "none",}}
+          /> 
+          
+            {numeirinhos.map((text) => (
+              <motion.div
+                key={text.id}
+                initial={{opacity: 1, y: 0}}
+                animate={{opacity: 0, y: -50}}
+                transition={{ duration: 1, ease: "easeOut"}}
+                style={{
+                  position: "absolute",
+                  left: text.x,
+                  top: text.y,
+                  transform: "translate(-50%, -50%)",
+                  color: "#fff",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  textShadow: "0 0 5px black",
+                  pointerEvents: "none",
+                }}
+                >
+                  +{click}
+            </motion.div>
+          ))}
+
+
+
+
+
+
+
          </div>
-      
 
 
       <div class="lado-direito">
