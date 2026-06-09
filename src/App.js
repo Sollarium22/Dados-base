@@ -7,30 +7,31 @@ import { motion, useAnimation} from 'framer-motion';
 
 
 function App() {
-  const b_dado = 0.5;
-  const b_jogador = 1;
-  const b_mesa = 1;
-  const b_mestre = 5;
+  const b_novato = 0.5;
+  const b_guerreiro = 1;
+  const b_arqueiro = 2;
+  const b_mago = 5;
+  const b_druida = 10;
   
   const [contagem, setContagem] = useState(0); // total de dados
   const [DPS, setDps] = useState(0); // total de Dados por segundo Dps
   const [click, setClick] = useState(1); // clic
   const [preco, setPreco] = useState(15);// preco
   const [construcoes, setConstrucoes] = useState([ //CONSTRUCOES
-  {nome: "Dado", preco: 15, dps: b_dado,  quantidade: 0, icone: dodo},
-  {nome: "jogador", preco: 100,dps: b_jogador,  quantidade: 0, icone: dodo},
-  {nome: "mesa", preco: 100,dps: b_mesa,  quantidade: 0, icone: dodo},
-  {nome: "mestre", preco: 1000,dps: b_mestre,  quantidade: 0, icone: dodo}
+  {nome: "Novato", preco: 15, dps: b_novato,  quantidade: 0, icone: dodo},
+  {nome: "Guerreiro", preco: 100,dps: b_guerreiro,  quantidade: 0, icone: dodo},
+  {nome: "Arqueiro", preco: 1000,dps: b_arqueiro,  quantidade: 0, icone: dodo},
+  {nome: "Mago", preco: 2000,dps: b_mago,  quantidade: 0, icone: dodo},
+  {nome: "Druida", preco: 5000,dps: b_druida,  quantidade: 0, icone: dodo},
   ]);
 
-
-  //lista de upgrades
-  const [upgrade, setUpgrade] = useState([
-    {nome: "Resina" , preco:"10" , efeito:"duplicarClick" , comprado: false , id: "click1"},
-    {nome: "Dados metalicos" , preco:"10" , efeito:"duplicarDado" , comprado: false , id: "dados1"},
-    {nome: "Dados Cromados", preco:"10" , efeito:"duplicarDado" , comprado: false, id: "dados2"}
-
-  ])
+    //lista de upgrades
+    const [upgrade, setUpgrade] = useState([
+    {nome: "Afiação" , preco:"10" , efeito:"duplicarClick" , comprado: false , id: "click1"},
+    {nome: "Mochila de Equipamentos" , preco:"10" , efeito:"duplicarDado" , comprado: false , id: "dados1"},
+    {nome: "Espada Nova", preco:"10" , efeito:"duplicarDado" , comprado: false, id: "dados2"}
+    ])
+  
 
 
   //os numeros que surgem do cookie
@@ -65,7 +66,7 @@ function App() {
       };
       localStorage.setItem("QuickSave", JSON.stringify(saveData));
       console.log(saveData);
-    }, 5000);
+    }, 60000);
     return () => clearInterval(autoSave);
   }, []);
 
@@ -80,13 +81,50 @@ function App() {
       setClick(dadosS.click ?? []);
       setConstrucoes(dadosS.construcoes ?? []);
       setUpgrade(dadosS.upgrade ?? []);
-
-    }
-    
+    }  
   }, [])
 
+  function exportarSave(){
+    const saveData = {
+      contagem: contagemRef.current,
+        click: clickRef.current,
+        construcoes: construcoesRef.current,
+        upgrade: upgradeRef.current,
+    }
+    const saveTexto = JSON.stringify(saveData);
+
+    const saveEncriptado = encodeURIComponent(saveTexto)
+
+    navigator.clipboard.writeText(saveEncriptado).catch(() => {});
+ 
+    alert("Salvamento copiado");
+  }
+
+  function importarSave(){
+    const inputImportar = prompt("Coloque o save Abaixo:");
+
+    const decodeSave = decodeURIComponent(inputImportar);
+
+    try{
+      const dadosS = JSON.parse(decodeSave); 
+
+      setContagem(dadosS.contagem ?? 0);
+      setClick(dadosS.click ?? []);
+      setConstrucoes(dadosS.construcoes ?? []);
+      setUpgrade(dadosS.upgrade ?? []);
+
+    } catch {
+      alert("Erro ao carregar o save");
+    }
+
+
+  }
 
   // =====================================EFEITO DE UPGRADES==========================================
+
+    
+
+
     useEffect(() => {
 
       //Multiplicadores comparar quantos tem
@@ -95,14 +133,14 @@ function App() {
 
       // calculo de multiplicador
       const novoClick = 1 * (2 ** multiplicador);
-      const novoDado = b_dado * (2 ** mult_dado);
+      const novoDado = b_novato * (2 ** mult_dado);
       setClick(novoClick);
 
       
       
       setConstrucoes((anterior) =>
         anterior.map((c) => {
-          if(c.nome === "Dado"){
+          if(c.nome === "Novato"){
           return { ...c, dps: novoDado}
           }
           return c;
@@ -161,7 +199,7 @@ function comprarUpgrade(indice) {
     });
   };
   //================================== BASE DE UPGRADES ==================
-    const contagemDado = construcoes.find((c) => c.nome === "Dado")?.quantidade || 0;
+    const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
     //APARECER UPRGADES
     const upgradeDisponiveis = upgrade.
     map((u, i) => ({ ...u, indiceOriginal: i }))
@@ -250,6 +288,13 @@ function comprarUpgrade(indice) {
             </motion.div>
           ))}
 
+          <button onClick={exportarSave}>
+            Exportar Save
+          </button>
+
+          <button onClick={importarSave}>
+            Importar Save
+          </button>
 
 
            <button onClick={() => {
