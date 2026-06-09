@@ -1,25 +1,30 @@
 import logo from './logo.svg';
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import dado from './d4.png';
 import dodo from './dodo.png';
 import { motion, useAnimation} from 'framer-motion';
 
 
 function App() {
-
+  const b_dado = 0.5;
+  const b_jogador = 1;
+  const b_mesa = 1;
+  const b_mestre = 5;
   
   const [contagem, setContagem] = useState(0); // total de dados
   const [DPS, setDps] = useState(0); // total de Dados por segundo Dps
   const [click, setClick] = useState(1); // clic
   const [preco, setPreco] = useState(15);// preco
-  const [construcoes, setConstrucoes] = useState([
-  {nome: "Dado", preco: 15, dps: 0.5,  quantidade: 0, icone: dodo},
-  {nome: "jogador", preco: 100,dps: 1,  quantidade: 0, icone: dodo},
-  {nome: "mesa", preco: 100,dps: 1,  quantidade: 0, icone: dodo},
-  {nome: "mestre", preco: 1000,dps: 5,  quantidade: 0, icone: dodo}
+  const [construcoes, setConstrucoes] = useState([ //CONSTRUCOES
+  {nome: "Dado", preco: 15, dps: b_dado,  quantidade: 0, icone: dodo},
+  {nome: "jogador", preco: 100,dps: b_jogador,  quantidade: 0, icone: dodo},
+  {nome: "mesa", preco: 100,dps: b_mesa,  quantidade: 0, icone: dodo},
+  {nome: "mestre", preco: 1000,dps: b_mestre,  quantidade: 0, icone: dodo}
   ]);
 
+
+  //lista de upgrades
   const [upgrade, setUpgrade] = useState([
     {nome: "Resina" , preco:"10" , efeito:"duplicarClick" , comprado: false , id: "click1"},
     {nome: "Dados metalicos" , preco:"10" , efeito:"duplicarDado" , comprado: false , id: "dados1"},
@@ -27,15 +32,61 @@ function App() {
 
   ])
 
-  //os numeros
+
+  //os numeros que surgem do cookie
   const [numeirinhos, setNumeirinhos] = useState([]);
 
   function contarDado(){
     setContagem(contagem + click);
 
   }
+  // ===================================== SAVES=================================== ARRUMAR AQUI
+  // Referencias
+  const contagemRef = useRef(contagem);
+  const clickRef = useRef(click);
+  const construcoesRef = useRef(construcoes);
+  const upgradeRef = useRef(upgrade);
 
-  // EFEITO DE UPGRADES
+  // Sincronia de referencias
+  useEffect(() => { contagemRef.current = contagem;}, [contagem]);
+  useEffect(() => { clickRef.current = click;}, [click]);
+  useEffect(() => { construcoesRef.current = construcoes;}, [construcoes]);
+  useEffect(() => { upgradeRef.current = upgrade}, [upgrade]);
+  
+
+  //SAVES
+  useEffect(()=> {
+    const autoSave = setInterval (() => {
+      const saveData = {
+        contagem: contagemRef.current,
+        click: clickRef.current,
+        construcoes: construcoesRef.current,
+        upgrade: upgradeRef.current,
+      };
+      localStorage.setItem("QuickSave", JSON.stringify(saveData));
+      console.log(saveData);
+    }, 5000);
+    return () => clearInterval(autoSave);
+  }, []);
+
+
+  useEffect(() => {
+    const salvamento = localStorage.getItem("QuickSave")
+    
+    if(salvamento){
+      const dadosS = JSON.parse(salvamento); 
+
+      setContagem(dadosS.contagem ?? 0);
+      setClick(dadosS.click ?? []);
+      setConstrucoes(dadosS.construcoes ?? []);
+      setUpgrade(dadosS.upgrade ?? []);
+
+    }
+    
+  }, [])
+
+
+  // =====================================EFEITO DE UPGRADES==========================================
     useEffect(() => {
 
       //Multiplicadores comparar quantos tem
@@ -44,7 +95,7 @@ function App() {
 
       // calculo de multiplicador
       const novoClick = 1 * (2 ** multiplicador);
-      const novoDado = 0.5 * (2 ** mult_dado);
+      const novoDado = b_dado * (2 ** mult_dado);
       setClick(novoClick);
 
       
@@ -109,7 +160,7 @@ function comprarUpgrade(indice) {
       return novo
     });
   };
-
+  //================================== BASE DE UPGRADES ==================
     const contagemDado = construcoes.find((c) => c.nome === "Dado")?.quantidade || 0;
     //APARECER UPRGADES
     const upgradeDisponiveis = upgrade.
@@ -117,7 +168,7 @@ function comprarUpgrade(indice) {
     .filter(u => {
       if (u.comprado) return false;
 
-      if (u.id === "click1" && contagem < 100) return false;
+      if (u.id === "click1" && contagem < 10) return false;
       if (u.id === "dados1" && contagemDado < 1) return false;
       if (u.id === "dados2" && contagemDado < 10) return false;
 
@@ -201,7 +252,10 @@ function comprarUpgrade(indice) {
 
 
 
-
+           <button onClick={() => {
+            localStorage.removeItem("QuickSave");
+            window.location.reload();
+          }}> Resetar </button>
 
 
 
