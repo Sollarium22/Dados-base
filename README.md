@@ -6,7 +6,7 @@
 
 Ele utiliza React e ainda não tem um site em si, então se quiser jogar, terá de baixar o Node.js, e utilizar o seu prompt de comando, basta acessar a pasta aonde ele está baixado usando:
 
-### cd caminho/da/pasta/instalada
+### `cd caminho/da/pasta/instalada`
 
 E utilizar o comando:
 
