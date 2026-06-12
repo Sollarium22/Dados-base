@@ -1,14 +1,397 @@
-.App {
+/* ==========================================================================
+   1. CONFIGURAÇÃO GERAL & TEMA DARK FANTASY (ROXO & CARMESIM)
+   ========================================================================== */
+body {
+  margin: 0;
+  font-family: 'Georgia', 'Times New Roman', serif; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #09060b; 
+  background-image: radial-gradient(circle, #1c1124 0%, #060408 100%);
+  color: #d1cbd4;
+  height: 100vh;
+  overflow: hidden; /* Impede rolagem na tela inteira, igual Cookie Clicker */
+}
+
+/* CONTAINER PRINCIPAL: Dividido em 3 colunas verticais que cobrem a tela inteira */
+.jogo {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  align-items: stretch;
+}
+
+/* ==========================================================================
+   2. COLUNA DA ESQUERDA: ÁREA DE CLIQUES (O DADO)
+   ========================================================================== */
+.secao-dado {
+  width: 30%; /* Ocupa cerca de 1/3 esquerdo da tela */
+  min-width: 300px;
   text-align: center;
+  padding: 20px;
+  background: rgba(14, 10, 18, 0.7);
+  box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.9);
+  
+  /* Borda direita separando a primeira coluna */
+  border-right: 4px ridge #5a2c85; 
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.secao-dado h1 {
+  color: #ff3344;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255, 51, 68, 0.5), 0 2px 4px #000;
+  margin-top: 10px;
+  font-size: 28px;
 }
 
+.secao-dado h2 {
+  color: #e0d9cc;
+  font-size: 18px;
+  margin: 10px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
 
+.secao-dado h3 {
+  color: #a04ef6; 
+  font-size: 15px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 5px rgba(160, 78, 246, 0.3);
+}
 
+#dadoP {
+  transition: filter 0.2s ease;
+  filter: drop-shadow(0 0 8px rgba(160, 78, 246, 0.2));
+  margin-top: 20px;
+}
 
+#dadoP:hover {
+  filter: drop-shadow(0 0 15px rgba(255, 51, 68, 0.6)) brightness(1.1);
+}
 
+.numero-flutuante {
+  color: #ff3344;
+  font-size: 24px;
+  font-weight: bold;
+  pointer-events: none; 
+  text-shadow: 0 2px 4px #000, 0 0 8px rgba(255, 51, 68, 0.6);
+  z-index: 1000;
+  animation: subirSumiu 1s ease-out forwards;
+}
 
+@keyframes subirSumiu {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-100px) scale(0.8); opacity: 0; }
+}
+
+/* ==========================================================================
+   3. COLUNA CENTRAL: ELEMENTOS VISUAIS / CONSTRUÇÕES RENDERIZADAS
+   ========================================================================== */
+.App > div:not(.jogo) {
+  display: none; 
+}
+
+.jogo::before {
+  content: "Área de Conquistas / Status Visuais";
+  font-size: 14px;
+  color: #4a385c;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  
+  flex: 1; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0c0812;
+  background-image: linear-gradient(to bottom, #07040a, #130c1c);
+  border-right: 4px ridge #5a2c85;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+   4. COLUNA DA DIREITA: LOJA COMPLETA (UPGRADES & CONSTRUÇÕES)
+   ========================================================================== */
+.lado-direito {
+  width: 25%; 
+  min-width: 280px;
+  height: 100vh;
+  background-color: #110d14;
+  background-image: linear-gradient(135deg, #18111f 0%, #0c090e 100%);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.secao-upgrade,
+.secao-construcao {
+  width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-bottom: 2px ridge #3c1e4d;
+}
+
+/* CORREÇÃO DO CONTAINER MÃE DOS UPGRADES EM CSS PURO: */
+.secao-upgrade {
+  max-height: 180px; 
+  overflow-y: auto;
+  
+  /* Ativa o grid de 5 colunas diretamente na caixa principal, organizando os botões filhos */
+  display: grid;
+  grid-template-columns: repeat(5, 44px); /* Cria exatamente 5 colunas fixas de 44px */
+  gap: 5px; 
+  justify-content: start;
+}
+
+.secao-construcao {
+  flex: 1; 
+  overflow-y: auto;
+}
+
+/* Centraliza os títulos e força eles a ocuparem a largura inteira da grade */
+.secao-upgrade h2,
+.secao-construcao h2 {
+  grid-column: span 5; /* Faz o título ocupar o espaço das 5 colunas no topo */
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #ff3344; 
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 6px rgba(255, 51, 68, 0.4);
+  border-bottom: 1px dashed #3d2354;
+  padding-bottom: 6px;
+}
+
+.secao-upgrade::-webkit-scrollbar,
+.secao-construcao::-webkit-scrollbar {
+  width: 6px;
+}
+.secao-upgrade::-webkit-scrollbar-thumb,
+.secao-construcao::-webkit-scrollbar-thumb {
+  background: #4a2173;
+  border-radius: 3px;
+}
+.secao-upgrade::-webkit-scrollbar-track,
+.secao-construcao::-webkit-scrollbar-track {
+  background: #09060a;
+}
+
+/* ==========================================================================
+   5. BOTÕES DE COMPRA INTERNOS DOS PAINÉIS
+   ========================================================================== */
+.secao-construcao button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  background: linear-gradient(to bottom, #1d1524, #100b14);
+  color: #c4b9cc;
+  border: 1px solid #3d2354;
+  border-radius: 4px;
+  text-align: left;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  position: static; 
+}
+
+/* Slot quadrado do upgrade */
+.secao-upgrade button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 44px;  
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  background: #060408;
+  border: 2px solid #8c6d3d; /* Moldura clássica marrom/ouro velho */
+  border-radius: 2px;
+  box-shadow: inset 0 0 5px #000;
+  position: static; 
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* Oculta os textos internos dos upgrades */
+.secao-upgrade button .info-texto {
+  display: none !important;
+}
+
+/* Oculta quebras de linha soltas geradas pelo .map dentro da lista de upgrades */
+.secao-upgrade br {
+  display: none !important;
+}
+
+.info-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.nome-item {
+  font-weight: bold;
+  color: #e0d9cc;
+}
+
+.preco-item,
+.qtd-item {
+  font-size: 11px;
+  color: #a399aa;
+}
+
+/* Ícones das Construções */
+.secao-construcao img {
+  height: 40px;
+  width: 40px;
+  border-radius: 4px;
+  border: 2px solid #5a2c85; 
+  background-color: #070508;
+  padding: 2px;
+  filter: brightness(0) invert(1); 
+}
+
+/* Ícones dos Upgrades */
+.secao-upgrade img {
+  height: 38px;
+  width: 38px;
+  padding: 0;
+  background: transparent;
+  filter: none !important; /* Preserva as artes originais das melhorias */
+}
+
+/* Interações */
+.secao-construcao button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #2b1d36, #170f1f);
+  border-color: #ff3344; 
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 51, 68, 0.25);
+}
+
+.secao-construcao button:hover:not(:disabled) img {
+  filter: brightness(0) invert(1) drop-shadow(0 0 4px rgba(255, 51, 68, 0.8));
+}
+
+/* Brilho ao passar o mouse na caixinha do upgrade */
+.secao-upgrade button:hover:not(:disabled) {
+  border-color: #ff3344; /* Borda brilha em vermelho carmesim no hover */
+  box-shadow: 0 0 8px rgba(255, 51, 68, 0.5);
+}
+
+.secao-construcao button:active:not(:disabled),
+.secao-upgrade button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   6. COMPORTAMENTOS VISUAIS DOS POPUPS (GRIMÓRIOS FLUTUANTES)
+   ========================================================================== */
+.secao-construcao button .popup-info,
+.secao-upgrade button .popup-info {
+  display: none;
+  background: rgba(8, 5, 10, 0.98);
+  color: #cbbcc7;
+  border: 2px solid #ff3344; 
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: left;
+  box-shadow: -5px 5px 20px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 51, 68, 0.15);
+  width: 220px;              
+  white-space: normal;       
+  word-wrap: break-word;
+  
+  position: fixed;
+  pointer-events: none; 
+  transform: translate(-108%, 1px); 
+  z-index: 999999;
+}
+
+.secao-construcao button:hover .popup-info,
+.secao-upgrade button:hover .popup-info {
+  display: block;
+}
+
+.popup-info strong {
+  color: #ff3344; 
+  font-size: 14px;
+  display: block;
+  margin-bottom: 4px;
+  text-shadow: 0 0 5px rgba(255, 51, 68, 0.3);
+}
+
+.popup-info em {
+  color: #a04ef6; 
+  font-style: normal;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.popup-info p {
+  margin: 0;
+  font-size: 11px;
+  color: #8c7e92;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   7. PAINEL DE BOTÕES DE PROGRESSO (SAVE ACTIONS)
+   ========================================================================== */
+.save-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.btn-save, .btn-import, .btn-export, .btn-reset {
+  font-family: 'Georgia', serif;
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.btn-save, .btn-export, .btn-import {
+  background: linear-gradient(to bottom, #1c1324, #0b070f);
+  border: 1px solid #5a2c85;
+  color: #c4b9cc;
+}
+
+.btn-save:hover, .btn-export:hover, .btn-import:hover {
+  border-color: #a04ef6; 
+  color: #fff;
+}
+
+.btn-reset {
+  background: linear-gradient(to bottom, #2a0b11, #120306);
+  border: 1px solid #991b22;
+  color: #fca5a5;
+}
+
+.btn-reset:hover {
+  border-color: #ff3344; 
+  color: #fff;
+}

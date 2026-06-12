@@ -5,6 +5,14 @@ import dado from './d4.png';
 import dodo from './dodo.png';
 import { motion, useAnimation} from 'framer-motion';
 
+// ICONS
+
+import galho from './galho.png';
+import espada from './espada.png';
+import arco from './arco.png';
+import cajado from './cajado.png';
+import pata from './pata.png';
+
 
 function App() {
   const b_novato = 0.5;
@@ -13,23 +21,23 @@ function App() {
   const b_mago = 5;
   const b_druida = 10;
   
-  const [contagem, setContagem] = useState(0); // total de dados
+  const [contagem, setContagem] = useState(1000000000000); // total de dados
   const [DPS, setDps] = useState(0); // total de Dados por segundo Dps
   const [click, setClick] = useState(1); // clic
   const [preco, setPreco] = useState(15);// preco
   const [construcoes, setConstrucoes] = useState([ //CONSTRUCOES
-  {nome: "Novato", preco: 15, dps: b_novato,  quantidade: 0, icone: dodo},
-  {nome: "Guerreiro", preco: 100,dps: b_guerreiro,  quantidade: 0, icone: dodo},
-  {nome: "Arqueiro", preco: 1000,dps: b_arqueiro,  quantidade: 0, icone: dodo},
-  {nome: "Mago", preco: 2000,dps: b_mago,  quantidade: 0, icone: dodo},
-  {nome: "Druida", preco: 5000,dps: b_druida,  quantidade: 0, icone: dodo},
+  {nome: "Novato", preco: 15, dps: b_novato,  quantidade: 0, icone: galho, descricao: "Um Novato ainda muito inesperiente, porem com muitos ramos a seguir"},
+  {nome: "Guerreiro", preco: 100,dps: b_guerreiro,  quantidade: 0, icone: espada, descricao: "Um Guerreiro nao muito habilidoso...bem...ele sabe usar a espada pra fazer um churrasco"},
+  {nome: "Arqueiro", preco: 1000,dps: b_arqueiro,  quantidade: 0, icone: arco, descricao: "Um Arqueiro com um problema de mira...pelo menos ele atira varias vezes até acertar"},
+  {nome: "Mago", preco: 2000,dps: b_mago,  quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia"},
+  {nome: "Druida", preco: 5000,dps: b_druida,  quantidade: 0, icone: pata, descricao: "Um Druida meio chapado com altas confusoes de identidade...ele gosta de lobos"},
   ]);
 
     //lista de upgrades
     const [upgrade, setUpgrade] = useState([
-    {nome: "Afiação" , preco:"10" , efeito:"duplicarClick" , comprado: false , id: "click1"},
-    {nome: "Mochila de Equipamentos" , preco:"10" , efeito:"duplicarDado" , comprado: false , id: "dados1"},
-    {nome: "Espada Nova", preco:"10" , efeito:"duplicarDado" , comprado: false, id: "dados2"}
+    {nome: "Afiação" , preco:"10" , efeito:"duplicarClick" , comprado: false , id: "click1", icone: dodo},
+    {nome: "Mochila de Equipamentos" , preco:"10" , efeito:"duplicarDado" , comprado: false , id: "dados1", icone: dodo},
+    {nome: "Espada Nova", preco:"10" , efeito:"duplicarDado" , comprado: false, id: "dados2", icone: dodo}
     ])
   
 
@@ -117,13 +125,9 @@ function App() {
       alert("Erro ao carregar o save");
     }
 
-
   }
 
   // =====================================EFEITO DE UPGRADES==========================================
-
-    
-
 
     useEffect(() => {
 
@@ -149,7 +153,6 @@ function App() {
 
     }, [upgrade])
     
-   
 
   // TEMPO DO JOGO
   useEffect(() =>{
@@ -213,8 +216,6 @@ function comprarUpgrade(indice) {
       return true;
     });
 
-
-
      //lista de comprados:
     const upgradeComprados = upgrade.filter((u) => u.comprado)
 
@@ -239,18 +240,37 @@ function comprarUpgrade(indice) {
       setNumeirinhos((prev) => prev.filter((t) => t.id !== id)); // faz os numeirinhos sumirem
     }, 1000) // define para eles ficarem por 1 segundo
     };
+    // ================================ARREDONDANDO================================
+
+   function formatarNumero(num) {
+  if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
+
+  // Sufixos no plural e no singular emparelhados por índice
+  const sufixosPlural = ["", " Mil", " Milhões", " Bilhões", " Trilhões", " Quatrilhões", " Quintilhões", " Sextilhões"];
+  const sufixosSingular = ["", " Mil", " Milhão", " Bilhão", " Trilhão", " Quatrilhão", " Quintilhão", " Sextilhão"];
+  
+  // Encontra a "casa" do número (2 = milhão, 3 = bilhão, etc.)
+  const i = Math.floor(Math.log10(num) / 3);
+  
+  // Calcula o valor reduzido (ex: 1.250.000 vira 1.25)
+  const valorReduzido = num / Math.pow(10, i * 3);
+  
+  // Se a parte inteira do número for exatamente 1, usa o singular. Caso contrário, plural.
+  const sufixoCorreto = Math.floor(valorReduzido) === 1 ? sufixosSingular[i] : sufixosPlural[i];
+  
+  // Retorna com 3 casas decimais e o sufixo correto
+  return valorReduzido.toFixed(3) + sufixoCorreto;
+}
 
 
-
-
-// HTML
+// =============================================HTML=========================================
   return (
     <div className="App">
       <div className="jogo">
         <div class="secao-dado">
 
           <h1>Dado Clicker</h1>
-          <h2>Total de numeros: {Math.floor(contagem)}</h2>
+          <h2>Total de numeros: {formatarNumero(contagem)}</h2>
           <h3>DPS: {DPS.toFixed(1)}</h3>
           <motion.img
             id="dadoP"
@@ -288,55 +308,69 @@ function comprarUpgrade(indice) {
             </motion.div>
           ))}
 
-          <button onClick={exportarSave}>
-            Exportar Save
-          </button>
+          
 
-          <button onClick={importarSave}>
-            Importar Save
-          </button>
-
-
-           <button onClick={() => {
+          <div className="save-actions">
+            <button className="btn-export" onClick={exportarSave}>Exportar</button>
+            <button className="btn-import" onClick={importarSave}>Importar</button>
+            <button className="btn-reset" onClick={() => {
             localStorage.removeItem("QuickSave");
             window.location.reload();
-          }}> Resetar </button>
-
+          }}>Resetar</button>
+          </div>
 
 
          </div>
 
+      
 
       <div class="lado-direito">
         
-        <div class="secao-upgrade">
-          <h2>Upgrades</h2>
-          {upgradeDisponiveis.map((u, i) => 
-         <button onClick={() => comprarUpgrade(u.indiceOriginal)} disabled={contagem < u.preco}
-            style={{
-              opacity: contagem < u.preco ? 0.6 : 1,
-              cursor: contagem < u.preco ? "not-allowed" : "pointer",
-              marginBottom: "8px",
-            }}
-         > 
-            <img src={u.icone}></img> <br /> 
-            {u.nome} <br /> 
-            preço: {u.preco} <br />
-            Quantidade: {u.quantidade} <br />
-          </button>
-          )}
-        </div>
+        <div className="secao-upgrade">
+  <h2>Upgrades</h2>
+  {upgradeDisponiveis.map((u, i) => (
+    <button 
+      key={i}
+      className="botao-upgrade" 
+      onClick={() => comprarUpgrade(u.indiceOriginal)} 
+      disabled={contagem < u.preco}
+      style={{
+        opacity: contagem < u.preco ? 0.4 : 1,
+        cursor: contagem < u.preco ? "not-allowed" : "pointer",
+      }}
+    > 
+      <img src={u.icone} alt={u.nome} />
+      <div className="info-texto">
+        <span className="nome-item">{u.nome}</span>
+        <span className="preco-item">Preço: {u.preco}</span>
+        <span className="qtd-item">Qtd: {u.quantidade}</span>
+      </div>
+
+      {/* Caixa flutuante (popup) do Upgrade */}
+      <div className="popup-info">
+        <strong>{u.nome}</strong>
+        <p>{u.descricao || "Um artefato antigo imbuído de poder profano."}</p>
+      </div>
+    </button>
+  ))}
+</div>
    
         <div class="secao-construcao">
           <h2>Construções</h2>
-          {construcoes.map((c, i) => 
-         <button onClick={() => comprarConstrucao(i)}> 
-            <img src={c.icone}></img> <br /> 
-            {c.nome} <br /> 
-            preço: {c.preco} <br />
-            Quantidade: {c.quantidade} <br />
-          </button>
-          )}
+  {construcoes.map((c, i) => (
+    <button key={i} className="botao-construcao" onClick={() => comprarConstrucao(i)}> 
+      <img src={c.icone} alt={c.nome} /> <br /> 
+      {c.nome} <br /> 
+      preço: {c.preco} <br />
+      Quantidade: {c.quantidade} <br />
+      
+      {/* Caixa flutuante (popup) com informações extras */}
+      <div className="popup-info">
+        <strong>{c.nome}</strong>
+        <p>{c.descricao || "Um artefato antigo imbuído de poder profano."}</p>
+      </div>
+    </button>
+  ))}
         </div>
       </div>
       
