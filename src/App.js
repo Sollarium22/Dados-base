@@ -1,9 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
 import { useState, useEffect, useRef } from 'react';
-import dado from './d4.png';
+import dado from './d20.png';
 import dodo from './dodo.png';
-import { motion, useAnimation} from 'framer-motion';
+import { motion, PresenceContext, useAnimation } from 'framer-motion';
 
 // ICONS
 
@@ -13,64 +13,90 @@ import arco from './arco.png';
 import cajado from './cajado.png';
 import pata from './pata.png';
 
+//Icons dados
+
 
 function App() {
   const b_novato = 0.5;
   const b_guerreiro = 1;
-  const b_arqueiro = 2;
   const b_mago = 5;
-  const b_druida = 10;
-  
-  const [contagem, setContagem] = useState(1000000000000); // total de dados
+  const b_medico = 15;
+
+  const [contagem, setContagem] = useState(111110000); // total de dados
   const [DPS, setDps] = useState(0); // total de Dados por segundo Dps
   const [click, setClick] = useState(1); // clic
   const [preco, setPreco] = useState(15);// preco
   const [construcoes, setConstrucoes] = useState([ //CONSTRUCOES
-  {nome: "Novato", preco: 15, dps: b_novato,  quantidade: 0, icone: galho, descricao: "Um Novato ainda muito inesperiente, porem com muitos ramos a seguir"},
-  {nome: "Guerreiro", preco: 100,dps: b_guerreiro,  quantidade: 0, icone: espada, descricao: "Um Guerreiro nao muito habilidoso...bem...ele sabe usar a espada pra fazer um churrasco"},
-  {nome: "Arqueiro", preco: 1000,dps: b_arqueiro,  quantidade: 0, icone: arco, descricao: "Um Arqueiro com um problema de mira...pelo menos ele atira varias vezes até acertar"},
-  {nome: "Mago", preco: 2000,dps: b_mago,  quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia"},
-  {nome: "Druida", preco: 5000,dps: b_druida,  quantidade: 0, icone: pata, descricao: "Um Druida meio chapado com altas confusoes de identidade...ele gosta de lobos"},
+    { nome: "Novato", preco: 15, dps: b_novato, quantidade: 0, icone: galho, descricao: "Ele...era...o FrostBite...", assin: "- Chris...pré depressão" },
+    { nome: "Guerreiro", preco: 100, dps: b_guerreiro, quantidade: 0, icone: espada, descricao: "Um Guerreiro nao muito habilidoso...bem...ele sabe usar a espada pra fazer um churrasco" },
+    { nome: "Mago", preco: 10, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
+    { nome: "Medico de Campo", preco: 2000, dps: b_medico, quantidade: 0, icone: cajado, descricao: "ENTÃO SÓ SE MATA", assin: "- Leandrinho do Grau" },
+    { nome: "Pugilista", preco: 2000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "VEM PRA CIMA, EU TANKO", assin: "- Jurandir  (spoiler, ele nao tanka)" },
   ]);
 
-    //lista de upgrades
-    const [upgrade, setUpgrade] = useState([
-    {nome: "Afiação" , preco:"10" , efeito:"duplicarClick" , comprado: false , id: "click1", icone: dodo},
-    {nome: "Mochila de Equipamentos" , preco:"10" , efeito:"duplicarDado" , comprado: false , id: "dados1", icone: dodo},
-    {nome: "Espada Nova", preco:"10" , efeito:"duplicarDado" , comprado: false, id: "dados2", icone: dodo}
-    ])
-  
+  //lista de upgrades
+  const [upgrade, setUpgrade] = useState([
+    { nome: "Afiação", preco: "10", efeito: "duplicarClick", comprado: false, id: "click1", icone: dodo, descricao: "Uma pedra de amolar fodasse para vc só usar pra ajudar um pouco" },
+    { nome: "Mochila de Equipamentos", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados1", icone: dodo },
+    { nome: "Espada Nova", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados2", icone: dodo }
+  ])
 
+  // ============================MINIGAMES==================================
+  const [vinho, setVinho] = useState({
+    desbloqueado: false,
+    level: 1,
+    creditos: 0,
+    mercado: 1
+  })
+
+  useEffect(() => {
+    const vinheiro = construcoes.find(c => c.nome === "Mago");
+    if (vinheiro && vinheiro.quantidade >= 1) {
+      setVinho(prev =>
+        prev.desbloqueado ? prev : { ...prev, desbloqueado: true }
+
+      );
+
+    }
+  }, [construcoes])
 
   //os numeros que surgem do cookie
   const [numeirinhos, setNumeirinhos] = useState([]);
+  const [HistoricoVinho, setHistoricoVinho] = useState([]);
 
-  function contarDado(){
+  function contarDado() {
     setContagem(contagem + click);
 
   }
+
+
+
+
   // ===================================== SAVES=================================== ARRUMAR AQUI
   // Referencias
   const contagemRef = useRef(contagem);
   const clickRef = useRef(click);
   const construcoesRef = useRef(construcoes);
   const upgradeRef = useRef(upgrade);
+  const vinhoRef = useRef(vinho)
 
   // Sincronia de referencias
-  useEffect(() => { contagemRef.current = contagem;}, [contagem]);
-  useEffect(() => { clickRef.current = click;}, [click]);
-  useEffect(() => { construcoesRef.current = construcoes;}, [construcoes]);
-  useEffect(() => { upgradeRef.current = upgrade}, [upgrade]);
-  
+  useEffect(() => { contagemRef.current = contagem; }, [contagem]);
+  useEffect(() => { clickRef.current = click; }, [click]);
+  useEffect(() => { construcoesRef.current = construcoes; }, [construcoes]);
+  useEffect(() => { upgradeRef.current = upgrade }, [upgrade]);
+  useEffect(() => { vinhoRef.current = vinho }, [vinho]);
+
 
   //SAVES
-  useEffect(()=> {
-    const autoSave = setInterval (() => {
+  useEffect(() => {
+    const autoSave = setInterval(() => {
       const saveData = {
         contagem: contagemRef.current,
         click: clickRef.current,
         construcoes: construcoesRef.current,
         upgrade: upgradeRef.current,
+        vinho: vinhoRef.current,
       };
       localStorage.setItem("QuickSave", JSON.stringify(saveData));
       console.log(saveData);
@@ -81,40 +107,41 @@ function App() {
 
   useEffect(() => {
     const salvamento = localStorage.getItem("QuickSave")
-    
-    if(salvamento){
-      const dadosS = JSON.parse(salvamento); 
+
+    if (salvamento) {
+      const dadosS = JSON.parse(salvamento);
 
       setContagem(dadosS.contagem ?? 0);
       setClick(dadosS.click ?? []);
       setConstrucoes(dadosS.construcoes ?? []);
       setUpgrade(dadosS.upgrade ?? []);
-    }  
+      setVinho(dadosS.vinho ?? []);
+    }
   }, [])
 
-  function exportarSave(){
+  function exportarSave() {
     const saveData = {
       contagem: contagemRef.current,
-        click: clickRef.current,
-        construcoes: construcoesRef.current,
-        upgrade: upgradeRef.current,
+      click: clickRef.current,
+      construcoes: construcoesRef.current,
+      upgrade: upgradeRef.current,
     }
     const saveTexto = JSON.stringify(saveData);
 
     const saveEncriptado = encodeURIComponent(saveTexto)
 
-    navigator.clipboard.writeText(saveEncriptado).catch(() => {});
- 
+    navigator.clipboard.writeText(saveEncriptado).catch(() => { });
+
     alert("Salvamento copiado");
   }
 
-  function importarSave(){
+  function importarSave() {
     const inputImportar = prompt("Coloque o save Abaixo:");
 
     const decodeSave = decodeURIComponent(inputImportar);
 
-    try{
-      const dadosS = JSON.parse(decodeSave); 
+    try {
+      const dadosS = JSON.parse(decodeSave);
 
       setContagem(dadosS.contagem ?? 0);
       setClick(dadosS.click ?? []);
@@ -127,52 +154,51 @@ function App() {
 
   }
 
-  // =====================================EFEITO DE UPGRADES==========================================
+  // =====================================EFEITO DE UPGRADES/COMPRAS==========================================
 
-    useEffect(() => {
+  useEffect(() => {
 
-      //Multiplicadores comparar quantos tem
-      const multiplicador = upgrade.filter(u => u.efeito === "duplicarClick" && u.comprado).length;
-      const mult_dado = upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length;
+    //Multiplicadores comparar quantos tem
+    const multiplicador = upgrade.filter(u => u.efeito === "duplicarClick" && u.comprado).length;
+    const mult_dado = upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length;
 
-      // calculo de multiplicador
-      const novoClick = 1 * (2 ** multiplicador);
-      const novoDado = b_novato * (2 ** mult_dado);
-      setClick(novoClick);
+    // calculo de multiplicador
+    const novoClick = 1 * (2 ** multiplicador);
+    const novoDado = b_novato * (2 ** mult_dado);
+    setClick(novoClick);
 
-      
-      
-      setConstrucoes((anterior) =>
-        anterior.map((c) => {
-          if(c.nome === "Novato"){
-          return { ...c, dps: novoDado}
-          }
-          return c;
-        })
-      )
 
-    }, [upgrade])
-    
+
+    setConstrucoes((anterior) =>
+      anterior.map((c) => {
+        if (c.nome === "Novato") {
+          return { ...c, dps: novoDado }
+        }
+        return c;
+      })
+    )
+
+  }, [upgrade])
+
 
   // TEMPO DO JOGO
-  useEffect(() =>{
-    const timer = setInterval(() =>{
+  useEffect(() => {
+    const timer = setInterval(() => {
       const producao = construcoes.reduce((soma, c) => soma + c.dps * c.quantidade, 0)
       setDps(producao);
-      setContagem((atual) => atual + producao/10);
+      setContagem((atual) => atual + producao / 10);
     }, 100); //a cada 1 segundo roda aqui
-    return() => clearInterval(timer);//limpa o timer
+    return () => clearInterval(timer);//limpa o timer
   }, [construcoes]);
 
 
-
-function comprarUpgrade(indice) {
+  function comprarUpgrade(indice) {
     setUpgrade((anterior) => {
-      const novo = anterior.map((u, i) => { 
+      const novo = anterior.map((u, i) => {
         if (contagem >= u.preco && i === indice && !u.comprado) {
           setContagem(contagem - u.preco);
-          
-          return  {
+
+          return {
             ...u,
             comprado: true
           };
@@ -182,18 +208,17 @@ function comprarUpgrade(indice) {
       return novo
     });
   };
- 
 
-
+  //FUNCAO DE COMPRAR CONSTRUCAO
   function comprarConstrucao(indice) {
     setConstrucoes((anterior) => {
-      const novo = anterior.map((c, i) => { 
+      const novo = anterior.map((c, i) => {
         if (contagem >= c.preco && i == indice) {
           setContagem(contagem - c.preco);
-          return  {
+          return {
             ...c,
-            quantidade: c.quantidade+1,
-            preco: Math.floor(c.preco*1.2)
+            quantidade: c.quantidade + 1,
+            preco: Math.floor(c.preco * 1.2)
           }
         }
         return c;
@@ -201,10 +226,128 @@ function comprarUpgrade(indice) {
       return novo
     });
   };
+
+  // MINI GAME PARTE 2
+  const VINHO_BASE = 100000;
+  const valorAtualVinho = Math.floor(
+    VINHO_BASE * vinho.mercado)
+    ;
+
+  const precoVinhoCredito = Math.floor(100000 * Math.pow(1.2, vinho.level))
+
+
+
+  //FUNCAO COMPRAR MINIGAME LE DOUGLES
+  function comprarVinhoLevel() {
+    if (contagem >= precoVinhoCredito) {
+      setContagem(prev => prev - precoVinhoCredito);
+      setVinho(prev => ({
+        ...prev,
+        level: prev.level + 1
+      }));
+    }
+  };
+  //ok
+
+  useEffect(() => {
+    if (!vinho.desbloqueado || vinho.level === 0) return;
+
+    const timer = setInterval(() => {
+      setVinho(prev => ({
+        ...prev,
+        creditos: prev.creditos + prev.level * 0.001
+      }));
+    }, 100)
+   
+
+    return () => clearInterval(timer);
+  }, [vinho.desbloqueado, vinho.level]);
+ //ok
+
+
+  function venderVinho() {
+    const moedaInteiras = Math.floor(vinho.creditos);
+    if (moedaInteiras < 1) return;
+
+    const ganhoVinho = moedaInteiras * valorAtualVinho;
+
+    setContagem(c => c + ganhoVinho);
+    setVinho(prev => ({
+      ...prev,
+      creditos: prev.creditos - moedaInteiras
+    }));
+      //daria pra mostrar um aviso aqui e pá
+  }
+
+  //MERCADO DE ACOES DE VINHOS
+
+  useEffect(() => {
+    if (!vinho.desbloqueado) return;
+
+    const timer = setInterval(() => {
+
+      const mudanca = (Math.random() - 0.5)
+      let novoMercado = vinho.mercado + mudanca;
+
+      novoMercado = Math.max(0.01, Math.min(100, novoMercado))
+
+      setVinho(prev => {
+
+        return {
+          ...prev,
+          mercado: Number(novoMercado.toFixed(2))
+        }})
+
+      //setando historico
+      setHistoricoVinho(h => {
+        const novo = [...h, novoMercado];
+        return novo.slice(-30);
+      });
+    }, 30000);
+
+    return () => clearInterval(timer);
+
+  }, [vinho.desbloqueado]);
+
+
+
+  function GraficoVinho({ dados }) {
+    const width = 240;
+    const height = 120;
+    const padding = 10;
+
+    if (dados.length < 2) return null;
+
+
+    const min = Math.min(...dados);
+    const max = Math.max(...dados);
+    const range = max - min || 1;
+
+    const points = dados.map((value, i) => {
+      const x = (i / (dados.length - 1)) * width;
+      const y = height - ((value - min) / range) * height;
+      return `${x},${y}`;
+    });
+
+    return (
+      <svg width={width} height={height} style={{ background: "white", borderRadius: 6 }}>
+        <polyline
+          points={points.join(" ")}
+          fill="none"
+          stroke="black"
+          strokeWidth="2"
+        />
+      </svg>
+    )
+  }
+
+
+
+
   //================================== BASE DE UPGRADES ==================
-    const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
-    //APARECER UPRGADES
-    const upgradeDisponiveis = upgrade.
+  const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
+  //APARECER UPRGADES
+  const upgradeDisponiveis = upgrade.
     map((u, i) => ({ ...u, indiceOriginal: i }))
     .filter(u => {
       if (u.comprado) return false;
@@ -216,60 +359,92 @@ function comprarUpgrade(indice) {
       return true;
     });
 
-     //lista de comprados:
-    const upgradeComprados = upgrade.filter((u) => u.comprado)
+  //lista de comprados:
+  const upgradeComprados = upgrade.filter((u) => u.comprado)
 
-    //=================ANIMACAO DADO=========================
-    const controls = useAnimation();
-    const Clicar = (e) => {
-      //pega o horario atual
-      const id = Date.now();
-      //posicao do mouse
-      const x = e.clientX - 20;
-      const y = e.clientY - 20;
-      //seta o id, e posicoes
-      setNumeirinhos((prev) => [...prev, {id,x,y}]);
+  //=================ANIMACAO DADO=========================
+  const controls = useAnimation();
+  const Clicar = (e) => {
+    //pega o horario atual
+    const id = Date.now();
+    //posicao do mouse
+    const x = e.clientX - 20;
+    const y = e.clientY - 20;
+    //seta o id, e posicoes
+    setNumeirinhos((prev) => [...prev, { id, x, y }]);
 
-      //faz a animacao no cookie quando clica
-      controls.start({
+    //faz a animacao no cookie quando clica
+    controls.start({
       scale: [1, 0.9, 1.1, 1], //faz ele aumentar e diminuir
-      transition: { duration: 0.3, ease: "easeOut"} // faz ele faer isto em 0.3 segundos
+      transition: { duration: 0.3, ease: "easeOut" } // faz ele faer isto em 0.3 segundos
     });
     contarDado(); // conta o dados
     setTimeout(() => {
       setNumeirinhos((prev) => prev.filter((t) => t.id !== id)); // faz os numeirinhos sumirem
     }, 1000) // define para eles ficarem por 1 segundo
-    };
-    // ================================ARREDONDANDO================================
+  };
+  // ================================ARREDONDANDO================================
 
-   function formatarNumero(num) {
-  if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
+  function formatarNumero(num) {
+    if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
 
-  // Sufixos no plural e no singular emparelhados por índice
-  const sufixosPlural = ["", " Mil", " Milhões", " Bilhões", " Trilhões", " Quatrilhões", " Quintilhões", " Sextilhões"];
-  const sufixosSingular = ["", " Mil", " Milhão", " Bilhão", " Trilhão", " Quatrilhão", " Quintilhão", " Sextilhão"];
-  
-  // Encontra a "casa" do número (2 = milhão, 3 = bilhão, etc.)
-  const i = Math.floor(Math.log10(num) / 3);
-  
-  // Calcula o valor reduzido (ex: 1.250.000 vira 1.25)
-  const valorReduzido = num / Math.pow(10, i * 3);
-  
-  // Se a parte inteira do número for exatamente 1, usa o singular. Caso contrário, plural.
-  const sufixoCorreto = Math.floor(valorReduzido) === 1 ? sufixosSingular[i] : sufixosPlural[i];
-  
-  // Retorna com 3 casas decimais e o sufixo correto
-  return valorReduzido.toFixed(3) + sufixoCorreto;
-}
+    // Sufixos no plural e no singular emparelhados por índice
+    const sufixosPlural = ["", " Mil", " Milhões", " Bilhões", " Trilhões", " Quatrilhões", " Quintilhões", " Sextilhões"];
+    const sufixosSingular = ["", " Mil", " Milhão", " Bilhão", " Trilhão", " Quatrilhão", " Quintilhão", " Sextilhão"];
+
+    // Encontra a "casa" do número (2 = milhão, 3 = bilhão, etc.)
+    const i = Math.floor(Math.log10(num) / 3);
+
+    // Calcula o valor reduzido (ex: 1.250.000 vira 1.25)
+    const valorReduzido = num / Math.pow(10, i * 3);
+
+    // Se a parte inteira do número for exatamente 1, usa o singular. Caso contrário, plural.
+    const sufixoCorreto = Math.floor(valorReduzido) === 1 ? sufixosSingular[i] : sufixosPlural[i];
+
+    // Retorna com 3 casas decimais e o sufixo correto
+    return valorReduzido.toFixed(3) + sufixoCorreto;
+  }
 
 
-// =============================================HTML=========================================
+  // =============================================HTML=========================================
   return (
     <div className="App">
       <div className="jogo">
+        <div class="lado-esquerdo">
+
+          {vinho.desbloqueado && (
+            <div className='secao-le-dougles'>
+              <h2> Le Dougles </h2>
+
+              <p>Créditos: {vinho.creditos.toFixed(3)}</p> 
+              <p>Level: {vinho.level}</p>
+
+              <button 
+                onClick={comprarVinhoLevel}
+                disabled={contagem < precoVinhoCredito}
+              >
+                Fetilizante <br />
+                Preço: {precoVinhoCredito}
+              </button>
+              
+              <p>
+                Valor: {" "}
+                <strong>
+                  {valorAtualVinho.toLocaleString()} Coisos
+                </strong>
+              </p>
+              <GraficoVinho dados={HistoricoVinho} /> <br/>
+
+              <button onClick={venderVinho}>
+                Vender Vinho
+              </button>
+            </div>
+
+          )}
+        </div>
         <div class="secao-dado">
 
-          <h1>Dado Clicker</h1>
+          <h1>Buxas Clicker</h1>
           <h2>Total de numeros: {formatarNumero(contagem)}</h2>
           <h3>DPS: {DPS.toFixed(1)}</h3>
           <motion.img
@@ -280,102 +455,108 @@ function comprarUpgrade(indice) {
             WhileHover={{
               scale: 1.1,
               filter: "brightness(1.1)",
-              transition: {duration: 0.3, repeat: Infinity, repeatType: "reverse"},
+              transition: { duration: 0.3, repeat: Infinity, repeatType: "reverse" },
             }}
 
-            style={{ width: "400px", cursor: "pointer", borderRadius: "50%", userSelect: "none",}}
-          /> 
-          
-            {numeirinhos.map((text) => (
-              <motion.div
-                key={text.id}
-                initial={{opacity: 1, y: 0}}
-                animate={{opacity: 0, y: -50}}
-                transition={{ duration: 1, ease: "easeOut"}}
-                style={{
-                  position: "absolute",
-                  left: text.x,
-                  top: text.y,
-                  transform: "translate(-50%, -50%)",
-                  color: "#fff",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  textShadow: "0 0 5px black",
-                  pointerEvents: "none",
-                }}
-                >
-                  +{click}
+            style={{ width: "300px", cursor: "pointer", borderRadius: "0%", userSelect: "none", }}
+          />
+
+          {numeirinhos.map((text) => (
+            <motion.div
+              key={text.id}
+              initial={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 0, y: -50 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              style={{
+                position: "absolute",
+                left: text.x,
+                top: text.y,
+                transform: "translate(-50%, -50%)",
+                color: "#fff",
+                fontSize: "20px",
+                fontWeight: "bold",
+                textShadow: "0 0 5px black",
+                pointerEvents: "none",
+              }}
+            >
+              +{formatarNumero(click)}
             </motion.div>
           ))}
 
-          
+
 
           <div className="save-actions">
             <button className="btn-export" onClick={exportarSave}>Exportar</button>
             <button className="btn-import" onClick={importarSave}>Importar</button>
             <button className="btn-reset" onClick={() => {
-            localStorage.removeItem("QuickSave");
-            window.location.reload();
-          }}>Resetar</button>
+              localStorage.removeItem("QuickSave");
+              window.location.reload();
+            }}>Resetar</button>
           </div>
 
 
-         </div>
-
-      
-
-      <div class="lado-direito">
-        
-        <div className="secao-upgrade">
-  <h2>Upgrades</h2>
-  {upgradeDisponiveis.map((u, i) => (
-    <button 
-      key={i}
-      className="botao-upgrade" 
-      onClick={() => comprarUpgrade(u.indiceOriginal)} 
-      disabled={contagem < u.preco}
-      style={{
-        opacity: contagem < u.preco ? 0.4 : 1,
-        cursor: contagem < u.preco ? "not-allowed" : "pointer",
-      }}
-    > 
-      <img src={u.icone} alt={u.nome} />
-      <div className="info-texto">
-        <span className="nome-item">{u.nome}</span>
-        <span className="preco-item">Preço: {u.preco}</span>
-        <span className="qtd-item">Qtd: {u.quantidade}</span>
-      </div>
-
-      {/* Caixa flutuante (popup) do Upgrade */}
-      <div className="popup-info">
-        <strong>{u.nome}</strong>
-        <p>{u.descricao || "Um artefato antigo imbuído de poder profano."}</p>
-      </div>
-    </button>
-  ))}
-</div>
-   
-        <div class="secao-construcao">
-          <h2>Construções</h2>
-  {construcoes.map((c, i) => (
-    <button key={i} className="botao-construcao" onClick={() => comprarConstrucao(i)}> 
-      <img src={c.icone} alt={c.nome} /> <br /> 
-      {c.nome} <br /> 
-      preço: {c.preco} <br />
-      Quantidade: {c.quantidade} <br />
-      
-      {/* Caixa flutuante (popup) com informações extras */}
-      <div className="popup-info">
-        <strong>{c.nome}</strong>
-        <p>{c.descricao || "Um artefato antigo imbuído de poder profano."}</p>
-      </div>
-    </button>
-  ))}
         </div>
-      </div>
-      
 
-    </div>
+
+
+        <div class="lado-direito">
+
+          <div className="secao-upgrade">
+            <h2>Upgrades</h2>
+            {upgradeDisponiveis.map((u, i) => (
+              <button
+                key={i}
+                className="botao-upgrade"
+                onClick={() => comprarUpgrade(u.indiceOriginal)}
+                disabled={contagem < u.preco}
+                style={{
+                  opacity: contagem < u.preco ? 0.4 : 1,
+                  cursor: contagem < u.preco ? "not-allowed" : "pointer",
+                }}
+              >
+                <img src={u.icone} alt={u.nome} />
+                <div className="info-texto">
+                  <span className="nome-item">{u.nome}</span>
+                  <span className="preco-item">Preço: {u.preco}</span>
+                  <span className="qtd-item">Qtd: {u.quantidade}</span>
+                </div>
+
+                {/* Caixa flutuante (popup) do Upgrade */}
+                <div className="popup-info">
+                  <strong>{u.nome}</strong>
+                  <p> Preço:{formatarNumero(u.preco)}</p> <br />
+                  <p>{u.descricao || "Um artefato antigo imbuído de poder profano."}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div class="secao-construcao">
+            <h2>Construções</h2>
+            {construcoes.map((c, i) => (
+              <button key={i} className="botao-construcao" onClick={() => comprarConstrucao(i)}>
+                <img src={c.icone} alt={c.nome} /> <br />
+                {c.nome} <br />
+                preço: {formatarNumero(c.preco)} <br />
+                Quantidade: {c.quantidade} <br />
+                {/* Caixa flutuante (popup) com informações extras */}
+                <div className="popup-info">
+                  <strong>{c.nome}</strong>
+                  <p>{c.descricao || "Um artefato antigo imbuído de poder profano."}</p> <br />
+                  <p>{c.assin || "- O Narrador"}</p>
+                </div>
+              </button>
+            ))}
+
+          </div>
+
+        </div>
+
+
+
+
+      </div>
+
     </div>
   );
 }
