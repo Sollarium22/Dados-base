@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import dado from './d20.png';
 import dodo from './dodo.png';
 import { motion, PresenceContext, useAnimation } from 'framer-motion';
+import { VERSAO_ATUAL, DEFAULT_SAVE, processarSave } from './Versionamento';
 
 // ICONS
 
@@ -22,24 +23,48 @@ function App() {
   const b_mago = 5;
   const b_medico = 15;
 
-  const [contagem, setContagem] = useState(111110000); // total de dados
-  const [DPS, setDps] = useState(0); // total de Dados por segundo Dps
-  const [click, setClick] = useState(1); // clic
+ 
   const [preco, setPreco] = useState(15);// preco
-  const [construcoes, setConstrucoes] = useState([ //CONSTRUCOES
+  const DEFAULT_CONSTRUCOES = [
     { nome: "Novato", preco: 15, dps: b_novato, quantidade: 0, icone: galho, descricao: "Ele...era...o FrostBite...", assin: "- Chris...pré depressão" },
     { nome: "Guerreiro", preco: 100, dps: b_guerreiro, quantidade: 0, icone: espada, descricao: "Um Guerreiro nao muito habilidoso...bem...ele sabe usar a espada pra fazer um churrasco" },
     { nome: "Mago", preco: 10, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
     { nome: "Medico de Campo", preco: 2000, dps: b_medico, quantidade: 0, icone: cajado, descricao: "ENTÃO SÓ SE MATA", assin: "- Leandrinho do Grau" },
     { nome: "Pugilista", preco: 2000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "VEM PRA CIMA, EU TANKO", assin: "- Jurandir  (spoiler, ele nao tanka)" },
-  ]);
+  ]
 
-  //lista de upgrades
-  const [upgrade, setUpgrade] = useState([
+  const DEFAULT_MELHORIAS = [
     { nome: "Afiação", preco: "10", efeito: "duplicarClick", comprado: false, id: "click1", icone: dodo, descricao: "Uma pedra de amolar fodasse para vc só usar pra ajudar um pouco" },
     { nome: "Mochila de Equipamentos", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados1", icone: dodo },
     { nome: "Espada Nova", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados2", icone: dodo }
-  ])
+  ]
+
+  //tudo
+  const [contagem, setContagem] = useState(0); // total de dados
+  const [DPS, setDps] = useState(0); // total de Dados por segundo Dps
+  const [click, setClick] = useState(1); // clic
+  const [construcoes, setConstrucoes] = useState(DEFAULT_CONSTRUCOES);
+  const [upgrade, setUpgrade] = useState(DEFAULT_MELHORIAS);
+  // =============================SIMPLIFICADOR DE NUMEROS================================
+  function formatarNumero(num) {
+    if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
+
+    // Sufixos no plural e no singular emparelhados por índice
+    const sufixosPlural = ["", " Mil", " Milhões", " Bilhões", " Trilhões", " Quatrilhões", " Quintilhões", " Sextilhões"];
+    const sufixosSingular = ["", " Mil", " Milhão", " Bilhão", " Trilhão", " Quatrilhão", " Quintilhão", " Sextilhão"];
+
+    // Encontra a "casa" do número (2 = milhão, 3 = bilhão, etc.)
+    const i = Math.floor(Math.log10(num) / 3);
+
+    // Calcula o valor reduzido (ex: 1.250.000 vira 1.25)
+    const valorReduzido = num / Math.pow(10, i * 3);
+
+    // Se a parte inteira do número for exatamente 1, usa o singular. Caso contrário, plural.
+    const sufixoCorreto = Math.floor(valorReduzido) === 1 ? sufixosSingular[i] : sufixosPlural[i];
+
+    // Retorna com 3 casas decimais e o sufixo correto
+    return valorReduzido.toFixed(3) + sufixoCorreto;
+  }
 
   // ============================MINIGAMES==================================
   const [vinho, setVinho] = useState({
@@ -236,7 +261,6 @@ function App() {
   const precoVinhoCredito = Math.floor(100000 * Math.pow(1.2, vinho.level))
 
 
-
   //FUNCAO COMPRAR MINIGAME LE DOUGLES
   function comprarVinhoLevel() {
     if (contagem >= precoVinhoCredito) {
@@ -255,7 +279,7 @@ function App() {
     const timer = setInterval(() => {
       setVinho(prev => ({
         ...prev,
-        creditos: prev.creditos + prev.level * 0.001
+        creditos: prev.creditos + prev.level * 0.0003
       }));
     }, 100)
    
@@ -280,13 +304,12 @@ function App() {
   }
 
   //MERCADO DE ACOES DE VINHOS
-
   useEffect(() => {
     if (!vinho.desbloqueado) return;
 
     const timer = setInterval(() => {
 
-      const mudanca = (Math.random() - 0.5)
+      const mudanca = (Math.random() - 0.5)*0.2;
       let novoMercado = vinho.mercado + mudanca;
 
       novoMercado = Math.max(0.01, Math.min(100, novoMercado))
@@ -298,9 +321,10 @@ function App() {
           mercado: Number(novoMercado.toFixed(2))
         }})
 
+        let valor = novoMercado * VINHO_BASE;
       //setando historico
       setHistoricoVinho(h => {
-        const novo = [...h, novoMercado];
+        const novo = [...h, valor];
         return novo.slice(-30);
       });
     }, 30000);
@@ -310,9 +334,8 @@ function App() {
   }, [vinho.desbloqueado]);
 
 
-
   function GraficoVinho({ dados }) {
-    const width = 240;
+    const width = 250;
     const height = 120;
     const padding = 10;
 
@@ -323,25 +346,57 @@ function App() {
     const max = Math.max(...dados);
     const range = max - min || 1;
 
-    const points = dados.map((value, i) => {
-      const x = (i / (dados.length - 1)) * width;
-      const y = height - ((value - min) / range) * height;
-      return `${x},${y}`;
-    });
+    const color = dados[dados.length -1] >= dados[dados.length-2] ? "#4caf50" : "#f44336";
+
+
+    const points = dados.map((value, i) => ({
+      x: (i / (dados.length - 1)) * width,
+      y: height - ((value - min) / range) * height,
+     value
+    }));
+
+    const labels = [
+      { value: max, y: 12 },
+      { value: (max+min) / 2, y: height / 2},
+      { value: min, y: height-4}
+    ]
 
     return (
-      <svg width={width} height={height} style={{ background: "white", borderRadius: 6 }}>
-        <polyline
-          points={points.join(" ")}
-          fill="none"
-          stroke="black"
-          strokeWidth="2"
-        />
+      <svg width={width + 40 } height={height} style={{ background: "white", borderRadius: 6 }}>
+
+        {labels.map((l,i) => (
+          <text
+            key={i}
+            x={2}
+            y={l.y}
+            fill="#aaa"
+            fontSize="10"
+            >
+              {formatarNumero(l.value)}
+            </text>
+        ))}
+
+        {points.slice(1).map((p,i) => {
+          const prev = points[i];
+          const color = p.value >= prev.value ? "#4caf50" : "#f44336";
+          
+          return (
+            <line
+              key={i}
+              x1={prev.x + 40}
+              y1={prev.y}
+              x2={p.x + 40}
+              y2={p.y}
+              stroke={color}
+              strokeWidth="2"
+            />
+          );
+        })}
+        
+
       </svg>
     )
   }
-
-
 
 
   //================================== BASE DE UPGRADES ==================
@@ -383,28 +438,7 @@ function App() {
       setNumeirinhos((prev) => prev.filter((t) => t.id !== id)); // faz os numeirinhos sumirem
     }, 1000) // define para eles ficarem por 1 segundo
   };
-  // ================================ARREDONDANDO================================
-
-  function formatarNumero(num) {
-    if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
-
-    // Sufixos no plural e no singular emparelhados por índice
-    const sufixosPlural = ["", " Mil", " Milhões", " Bilhões", " Trilhões", " Quatrilhões", " Quintilhões", " Sextilhões"];
-    const sufixosSingular = ["", " Mil", " Milhão", " Bilhão", " Trilhão", " Quatrilhão", " Quintilhão", " Sextilhão"];
-
-    // Encontra a "casa" do número (2 = milhão, 3 = bilhão, etc.)
-    const i = Math.floor(Math.log10(num) / 3);
-
-    // Calcula o valor reduzido (ex: 1.250.000 vira 1.25)
-    const valorReduzido = num / Math.pow(10, i * 3);
-
-    // Se a parte inteira do número for exatamente 1, usa o singular. Caso contrário, plural.
-    const sufixoCorreto = Math.floor(valorReduzido) === 1 ? sufixosSingular[i] : sufixosPlural[i];
-
-    // Retorna com 3 casas decimais e o sufixo correto
-    return valorReduzido.toFixed(3) + sufixoCorreto;
-  }
-
+ 
 
   // =============================================HTML=========================================
   return (
