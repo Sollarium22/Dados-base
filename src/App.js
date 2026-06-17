@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, version } from 'react';
 import dado from './d20.png';
 import dodo from './dodo.png';
 import { motion, PresenceContext, useAnimation } from 'framer-motion';
@@ -31,13 +31,20 @@ function App() {
     { nome: "Mago", preco: 10, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
     { nome: "Medico de Campo", preco: 2000, dps: b_medico, quantidade: 0, icone: cajado, descricao: "ENTÃO SÓ SE MATA", assin: "- Leandrinho do Grau" },
     { nome: "Pugilista", preco: 2000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "VEM PRA CIMA, EU TANKO", assin: "- Jurandir  (spoiler, ele nao tanka)" },
+    // { nome: "Lo testador", preco: 10000000000000000, dps: 101000000000, quantidade: 0, icone: dado, descricao:"ABSOLUTA", assin: "SIM"}, <---- demonstração
   ]
 
   const DEFAULT_MELHORIAS = [
     { nome: "Afiação", preco: "10", efeito: "duplicarClick", comprado: false, id: "click1", icone: dodo, descricao: "Uma pedra de amolar fodasse para vc só usar pra ajudar um pouco" },
     { nome: "Mochila de Equipamentos", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados1", icone: dodo },
     { nome: "Espada Nova", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados2", icone: dodo }
-  ]
+  ] 
+
+  // FUNCAO PARA CALCULAR O PRECO ATUAL DE CADA CONSTRUCAO
+
+  function getPrecoAtual(precoBase, quantidade){
+    return Math.floor(precoBase * Math.pow(1.2, quantidade));
+  }
 
   //tudo
   const [contagem, setContagem] = useState(0); // total de dados
@@ -95,9 +102,7 @@ function App() {
   }
 
 
-
-
-  // ===================================== SAVES=================================== ARRUMAR AQUI
+  // ===================================== SAVES===================================
   // Referencias
   const contagemRef = useRef(contagem);
   const clickRef = useRef(click);
@@ -115,13 +120,40 @@ function App() {
 
   //SAVES
   useEffect(() => {
+    const salvamento = localStorage.getItem("QuickSave")
+
+    if (salvamento) {
+      try {
+          const dadosBrutos = JSON.parse(salvamento);
+
+          const saveSeguro = processarSave(dadosBrutos, construcoes, upgrade)
+
+          setContagem(saveSeguro.contagem ?? 0);
+          setClick(saveSeguro.click ?? []);
+          setConstrucoes(saveSeguro.construcoes ?? []);
+          setUpgrade(saveSeguro.upgrade ?? []);
+          setVinho(saveSeguro.vinho ?? []);
+
+      } catch (e){
+        console.error("Falha ao processar o auto-save", e)
+      }
+     
+    }
+  }, [])
+
+
+  //PERIODICO
+  useEffect(() => {
     const autoSave = setInterval(() => {
       const saveData = {
+        version: VERSAO_ATUAL,
         contagem: contagemRef.current,
         click: clickRef.current,
-        construcoes: construcoesRef.current,
-        upgrade: upgradeRef.current,
         vinho: vinhoRef.current,
+
+        //aplicacao pratica: apenas a quantidade / se é comprad e id
+        construcoes: construcoesRef.current.map(c => ({nome: c.nome, quantidade: c.quantidade})),
+        upgrade: upgradeRef.current.map(u => ({ id: u.id, comprado: u.comprado}))  
       };
       localStorage.setItem("QuickSave", JSON.stringify(saveData));
       console.log(saveData);
@@ -130,48 +162,41 @@ function App() {
   }, []);
 
 
-  useEffect(() => {
-    const salvamento = localStorage.getItem("QuickSave")
-
-    if (salvamento) {
-      const dadosS = JSON.parse(salvamento);
-
-      setContagem(dadosS.contagem ?? 0);
-      setClick(dadosS.click ?? []);
-      setConstrucoes(dadosS.construcoes ?? []);
-      setUpgrade(dadosS.upgrade ?? []);
-      setVinho(dadosS.vinho ?? []);
-    }
-  }, [])
-
   function exportarSave() {
     const saveData = {
+      version: VERSAO_ATUAL,
       contagem: contagemRef.current,
       click: clickRef.current,
-      construcoes: construcoesRef.current,
-      upgrade: upgradeRef.current,
+      //aplicacao pratica: apenas a quantidade / se é comprad e id
+      construcoes: construcoesRef.current.map(c => ({nome: c.nome, quantidade: c.quantidade})),
+      upgrade: upgradeRef.current.map(u => ({ id: u.id, comprado: u.comprado})) 
     }
     const saveTexto = JSON.stringify(saveData);
 
     const saveEncriptado = encodeURIComponent(saveTexto)
 
-    navigator.clipboard.writeText(saveEncriptado).catch(() => { });
-
-    alert("Salvamento copiado");
+    navigator.clipboard.writeText(saveEncriptado)
+    .then(() => alert("Salvamento copiado com sucesso!"))
+    .catch(() => alert("Erro ao copiar o save"));
   }
 
+  //importando
   function importarSave() {
     const inputImportar = prompt("Coloque o save Abaixo:");
+    if (!inputImportar) return;
 
-    const decodeSave = decodeURIComponent(inputImportar);
+    
 
     try {
-      const dadosS = JSON.parse(decodeSave);
+      const decodeSave = decodeURIComponent(inputImportar);
+      const dadosBrutos = JSON.parse(decodeSave);
 
-      setContagem(dadosS.contagem ?? 0);
-      setClick(dadosS.click ?? []);
-      setConstrucoes(dadosS.construcoes ?? []);
-      setUpgrade(dadosS.upgrade ?? []);
+      const saveSeguro = processarSave(dadosBrutos, construcoes, upgrade);
+
+      setContagem(saveSeguro.contagem );
+      setClick(saveSeguro.click );
+      setConstrucoes(saveSeguro.construcoes );
+      setUpgrade(saveSeguro.upgrade );
 
     } catch {
       alert("Erro ao carregar o save");
@@ -238,12 +263,13 @@ function App() {
   function comprarConstrucao(indice) {
     setConstrucoes((anterior) => {
       const novo = anterior.map((c, i) => {
-        if (contagem >= c.preco && i == indice) {
-          setContagem(contagem - c.preco);
+        const precoAtual = getPrecoAtual(c.preco, c.quantidade);
+        
+        if (contagem >= precoAtual && i === indice) {
+          setContagem(contagem - precoAtual);
           return {
             ...c,
-            quantidade: c.quantidade + 1,
-            preco: Math.floor(c.preco * 1.2)
+            quantidade: c.quantidade + 1
           }
         }
         return c;
