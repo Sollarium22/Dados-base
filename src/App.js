@@ -205,7 +205,7 @@ botoesComPopup.forEach(botao => {
       };
       localStorage.setItem("QuickSave", JSON.stringify(saveData));
       console.log(saveData);
-    }, 1000);
+    }, 60000);
     return () => clearInterval(autoSave);
   }, []);
 
@@ -270,8 +270,6 @@ botoesComPopup.forEach(botao => {
     const novoClick = 1 * (2 ** multiplicador);
     const novoDado = b_novato * (2 ** mult_dado);
     setClick(novoClick);
-
-
 
     setConstrucoes((anterior) =>
       anterior.map((c) => {
@@ -499,6 +497,22 @@ botoesComPopup.forEach(botao => {
   const progresso = (contagemAtual - contagemPrestigioAtual) / (contagemProximoPrestigio - contagemPrestigioAtual);
   const progressoPorcentagem = Math.min(Math.max(progresso, 0), 1);
 
+  function ascender(){
+    setTelaAtual("ascensao");
+    setContagem(0);
+    setClick(0);
+    setConstrucoes(DEFAULT_CONSTRUCOES);
+    setUpgrade(DEFAULT_MELHORIAS);
+    // setVinho(DEFAULT_VINHO)
+
+    setAscensao(prev => ({
+      ...prev,
+      desbloqueado:true,
+      prestigio: preco.prestigio + prestigioPossivel
+      //TERMINAR
+    }))
+  }
+
 
   //================================== BASE DE UPGRADES ==================
   const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
@@ -619,25 +633,29 @@ botoesComPopup.forEach(botao => {
           )}
 
          {telaAtual === "ascensao" && (
-  <div className="overlay-ascensao">
-    <div className="janela-ascensao">
+          <div className="overlay-ascensao">
+          <div className="janela-ascensao">
       
-      {/* Botão de Voltar no topo superior */}
-      <button className="botao-voltar-ascensao" onClick={() => setTelaAtual("jogo")}>
-        ← Voltar
-      </button>
+            {/* Botão de Voltar no topo superior */}
+            <button className="botao-voltar-ascensao" onClick={() => setTelaAtual("jogo")}>
+              ← Voltar
+            </button>
+            
+            {/* Conteúdo Central */}
+            <h2 className="titulo-ascensao">Pilares da Criação</h2>
 
-      {/* Conteúdo Central */}
-      <h2 className="titulo-ascensao">Pilares da Criação</h2>
-
-     
         
+          
       
       <div className="painel-prestigio">
         <span>Prestígio Atual</span>
         <strong>0</strong>
       </div>
+          <button className='botao-ascender'>
+          Fazer Kaboom
+        </button>
 
+        
     </div>
   </div>
 )}
@@ -749,7 +767,7 @@ botoesComPopup.forEach(botao => {
               <button key={i} className="botao-construcao" onClick={() => comprarConstrucao(i)}>
                 <img src={c.icone} alt={c.nome} /> <br />
                 {c.nome} <br />
-                preço: {formatarNumero(c.preco)} <br />
+                preço: {formatarNumero(getPrecoAtual(c.preco, c.quantidade))} <br />
                 Quantidade: {c.quantidade} <br />
                 {/* Caixa flutuante (popup) com informações extras */}
                 <div className="popup-info">
