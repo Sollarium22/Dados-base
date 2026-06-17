@@ -121,11 +121,22 @@ botoesComPopup.forEach(botao => {
 
     // ------------------------------------ASCENCAO--------------------------------------
   const [ascensao, setAscensao] = useState({
-    desbloqueado: true,
+    desbloqueado: false,
     prestigio: 0
   })
 
-  const [telaAtual, setTelaAtual] = useState("jogo"); //Telas: jogo, ascensao, conquistas
+  const [telaAtual, setTelaAtual] = useState("jogo"); //Telas: jogo, ascensao, pilares, conquistas,
+
+  useEffect(() => {
+    const pilar = construcoes.find(c => c.nome === "Pugilista");
+    if (pilar && pilar.quantidade >= 1) {
+      setAscensao(prev =>
+        prev.desbloqueado ? prev : { ...prev, desbloqueado: true }
+
+      );
+
+    }
+  }, [construcoes])
 
   
 
@@ -558,6 +569,8 @@ botoesComPopup.forEach(botao => {
   // =============================================HTML=========================================
   return (
     <div className="App">
+
+      {telaAtual !== "pilares" && (
       <div className="jogo">
         <div class="lado-esquerdo">
 
@@ -591,7 +604,7 @@ botoesComPopup.forEach(botao => {
             </div>
           )}
 
-          {telaAtual === "jogo" && (
+          {telaAtual === "jogo" && ascensao.desbloqueado &&(
             <div className='secao-ascensao'>
               <h2>Pilares da Criação</h2> 
               <p> Os pilares observam </p>
@@ -651,7 +664,7 @@ botoesComPopup.forEach(botao => {
         <span>Prestígio Atual</span>
         <strong>0</strong>
       </div>
-          <button className='botao-ascender'>
+          <button className='botao-ascender' >
           Fazer Kaboom
         </button>
 
@@ -661,10 +674,6 @@ botoesComPopup.forEach(botao => {
 )}
 
         </div>
-      
-     
-     
-
 
         {/* DADO*/ }
       {telaAtual == "jogo" && (
@@ -783,9 +792,9 @@ botoesComPopup.forEach(botao => {
         </div>
       )}
 
-
-
       </div>
+      )}
+
 
     </div>
   );

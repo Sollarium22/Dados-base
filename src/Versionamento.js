@@ -99,6 +99,7 @@ export function processarSave(saveCarregado, defaultsConstrucoes, defaultsUpgrad
         click: saveCarregado.click ?? DEFAULT_SAVE.click,
         vinho: { ...DEFAULT_SAVE.vinho, ...saveCarregado.vinho },
         construcoes: normalizeConstrucoes(saveCarregado.construcoes, defaultsConstrucoes),
-        upgrade: normalizeUpgrades(saveCarregado.upgrade, defaultsUpgrades)
+        upgrade: normalizeUpgrades(saveCarregado.upgrade, defaultsUpgrades),
+        ascensao: {...DEFAULT_SAVE.ascensao, ...saveCarregado.ascensao}
     };
 }
