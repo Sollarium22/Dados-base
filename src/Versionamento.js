@@ -2,7 +2,7 @@
 
 // VERSIONAMENTO DE SAVE
 
-export const VERSAO_ATUAL = 1.1;
+export const VERSAO_ATUAL = 1.2;
 
 export const DEFAULT_SAVE = {
     version: VERSAO_ATUAL,
@@ -19,7 +19,8 @@ export const DEFAULT_SAVE = {
         { id: "dados1", comprado: false },
         { id: "dados2", comprado: false }
     ],
-    vinho: { desbloqueado: false, level: 1, creditos: 0, mercado: 1 }
+    vinho: { desbloqueado: false, level: 1, creditos: 0, mercado: 1 },
+    ascensao: {desbloqueado: false, prestigio: 0}, 
 };
 
 const migracoes = {
@@ -37,6 +38,15 @@ const migracoes = {
         //     version: 2,
         //     construcoes: construcoesAtualizadas
         // }
+    
+
+    },
+    1.1: (saveAntigo) => {
+        return {
+            ...saveAntigo,
+            versao: 1.2,
+            ascensao: {desbloqueado: false, prestigio: 0},
+        }
     },
 
 };
@@ -85,6 +95,7 @@ export function processarSave(saveCarregado, defaultsConstrucoes, defaultsUpgrad
     return {
         version: VERSAO_ATUAL,
         contagem: saveCarregado.contagem ?? DEFAULT_SAVE.contagem,
+        contagemTotal: saveCarregado.contagemTotal ?? DEFAULT_SAVE.contagemTotal,
         click: saveCarregado.click ?? DEFAULT_SAVE.click,
         vinho: { ...DEFAULT_SAVE.vinho, ...saveCarregado.vinho },
         construcoes: normalizeConstrucoes(saveCarregado.construcoes, defaultsConstrucoes),

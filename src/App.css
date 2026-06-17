@@ -112,11 +112,16 @@ body {
   border-right: 4px ridge #5a2c85;
   text-align: center;
   box-sizing: border-box;
+
+  flex-direction: column;
 }
 
-.secao-le-dougles{
- color: #4a385c;
-}
+
+
+
+
+
+
 /* ==========================================================================
    4. COLUNA DA DIREITA: LOJA COMPLETA (UPGRADES & CONSTRUÇÕES)
    ========================================================================== */
@@ -267,7 +272,6 @@ body {
   border: 2px solid #5a2c85; 
   background-color: #070508;
   padding: 2px;
-  filter: brightness(0) invert(1); 
 }
 
 /* Ícones dos Upgrades */
@@ -308,6 +312,7 @@ body {
 .secao-construcao button .popup-info,
 .secao-upgrade button .popup-info {
   display: none;
+  position: fixed; /* Mantemos fixed para o cálculo do JS funcionar globalmente */
   background: rgba(8, 5, 10, 0.98);
   color: #cbbcc7;
   border: 2px solid #ff3344; 
@@ -320,10 +325,7 @@ body {
   width: 220px;              
   white-space: normal;       
   word-wrap: break-word;
-  
-  position: fixed;
   pointer-events: none; 
-  transform: translate(-108%, 1px); 
   z-index: 999999;
 }
 
@@ -396,4 +398,369 @@ body {
 .btn-reset:hover {
   border-color: #ff3344; 
   color: #fff;
+}
+
+/*AREAS ESPECIAIS*/
+
+.secao-le-dougles {
+  background: linear-gradient(135deg, #1a050d 0%, #3a0818 100%);
+  border: 2px solid #800020; /* Borda cor Vinho Burgundy */
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(128, 0, 32, 0.4);
+  color: #f5e6eb;
+  text-align: center;
+}
+
+.secao-le-dougles h2 {
+  color: #ff3366;
+  text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+  margin-bottom: 15px;
+}
+
+/* Ajuste do botão dentro do tema vinho */
+.secao-le-dougles button {
+  background: #5c0622;
+  color: #fff;
+  border: 1px solid #ff3366;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.secao-le-dougles button:hover:not(:disabled) {
+  background: #800020;
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+}
+
+/* Evita que o gráfico estoure ou desalinhe ao rolar */
+.secao-le-dougles canvas, 
+.secao-le-dougles div {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/*PILARES*/
+.secao-ascensao {
+  /* Fundo gradiente profundo que simula o espaço sideral */
+  background: radial-gradient(circle at top, #140727 0%, #05020a 100%);
+  
+  /* Borda com tom de energia cósmica/neon */
+  border: 2px solid #9d4edd; 
+  border-radius: 12px;
+  padding: 25px 20px;
+  
+  /* Sombra externa (Glow Cósmico) e interna para dar profundidade de galáxia */
+  box-shadow: 0 0 25px rgba(157, 78, 221, 0.25), 
+              inset 0 0 20px rgba(123, 44, 191, 0.4);
+  
+  color: #e0aaff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Título Divino com efeito de brilho estelar */
+.secao-ascensao h2 {
+  font-family: 'Cinzel', 'Georgia', serif; /* Fonte mais imponente/divina, se disponível */
+  color: #f7edf0;
+  font-size: 22px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  
+  /* Efeito de iluminação néon/estelar */
+  text-shadow: 0 0 8px rgba(224, 170, 255, 0.8), 
+               0 0 20px rgba(157, 78, 221, 0.5);
+}
+
+/* Subtítulo místico */
+.secao-ascensao p {
+  font-style: italic;
+  font-size: 13px;
+  color: #c77dff;
+  opacity: 0.85;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+/* O Portão de Entrada/Saída Cósmico */
+.portao-ascensao {
+  background: rgba(123, 44, 191, 0.1);
+  border: 1.5px solid #c77dff;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  
+  /* Transição suave para o efeito de energia cósmica */
+  transition: all 0.4s ease-in-out;
+  box-shadow: 0 0 10px rgba(199, 125, 255, 0.2);
+}
+
+/* Efeito ao passar o mouse: o portal se acende */
+.portao-ascensao:hover {
+  background: rgba(157, 78, 221, 0.3);
+  border-color: #e0aaff;
+  color: #ffffff;
+  
+  /* Expansão do brilho (Glow) */
+  box-shadow: 0 0 20px rgba(199, 125, 255, 0.6), 
+              0 0 40px rgba(123, 44, 191, 0.4);
+  text-shadow: 0 0 8px #fff;
+  transform: scale(1.02); /* Leve pulo para frente */
+}
+
+/* TELA PRESTIGIO*/
+
+/* Fundo que escurece o jogo atrás e centraliza a janela */
+.overlay-ascensao {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 2, 10, 0.85); /* Preto azulado transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999; /* Garante que fica por cima de todo o layout */
+  backdrop-filter: blur(4px); /* Leve desfoque no fundo do jogo */
+}
+
+/* Caixa principal da janela dos Pilares */
+/* Caixa principal da janela dos Pilares com fundo cósmico */
+.janela-ascensao {
+  /* Mistura uma camada escura com a imagem da galáxia para manter a legibilidade */
+  background: linear-gradient(rgba(5, 2, 10, 0.4), rgba(20, 7, 39, 0.75)), 
+              url('./gala.png') no-repeat center center;
+  
+  /* Ajusta o tamanho da imagem para cobrir a caixa toda sem distorcer */
+  background-size: cover; 
+  
+  border: 2px solid #9d4edd; /* Borda Roxa Cósmica */
+  border-radius: 16px;
+  width: 80%;
+  max-width: 800px;
+  height: 80vh;
+  padding: 30px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  /* Brilho externo e interno simulando poeira estelar */
+  box-shadow: 0 0 40px rgba(157, 78, 221, 0.4), 
+              inset 0 0 40px rgba(5, 2, 10, 0.9);
+  color: #e0aaff;
+}
+
+/* Botão de Voltar posicionado no topo */
+.botao-voltar-ascensao {
+  position: absolute;
+  top: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(224, 170, 255, 0.4);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.botao-voltar-ascensao:hover {
+  background: rgba(157, 78, 221, 0.4);
+  border-color: #e0aaff;
+  box-shadow: 0 0 10px rgba(199, 125, 255, 0.5);
+}
+
+/* Título Divino */
+.titulo-ascensao {
+  font-size: 28px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #f7edf0;
+  text-shadow: 0 0 10px rgba(224, 170, 255, 0.8), 0 0 20px rgba(157, 78, 221, 0.6);
+}
+
+/* Painel de Prestígio centralizado horizontalmente */
+.painel-prestigio {
+  background: rgba(20, 10, 35, 0.6);
+  border: 1.5px solid #ff3344; /* Borda néon de destaque */
+  border-radius: 8px;
+  width: 90%;
+  max-width: 650px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 0 15px rgba(255, 51, 68, 0.2);
+}
+
+.painel-prestigio span {
+  font-size: 14px;
+  color: #c77dff;
+  letter-spacing: 1px;
+}
+
+.painel-prestigio strong {
+  font-size: 32px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+
+.barra-prestigio-box {
+  background: rgba(15, 8, 28, 0.7);
+  border: 1px solid rgba(157, 78, 221, 0.4);
+  border-radius: 10px;
+  width: 90%;
+  max-width: 650px;
+  padding: 18px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(123, 44, 191, 0.15);
+  margin-top: 15px;
+}
+
+/* Alinhamento do texto (Texto na esquerda, Número na direita) */
+.barra-prestigio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.barra-prestigio-header span {
+  font-size: 13px;
+  color: #c77dff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Número do prestígio com brilho verde/azul divino de ganho */
+.barra-prestigio-header strong {
+  font-size: 18px;
+  color: #00f5d4; 
+  text-shadow: 0 0 10px rgba(0, 245, 212, 0.6);
+}
+
+/* A parte de fora da barra (o fundo cinza/escuro) */
+.barra-prestigio-fora {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden; /* Garante que os cantos da barra de dentro respeitem o arredondamento */
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* A parte de dentro da barra (o preenchimento que se move) */
+.barra-prestigio-dentro {
+  height: 100%;
+  /* Gradiente linear que passa a ideia de energia carregando */
+  background: linear-gradient(90deg, #7b2cbf 0%, #9d4edd 50%, #00f5d4 100%);
+  border-radius: 6px;
+  transition: width 0.4s ease-out; /* Suaviza o movimento quando a barra crescer */
+  
+  /* Cria uma linha de luz horizontal dentro da própria barra */
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.prestigio-info {
+  position: absolute;
+  /* Ajuste a distância do topo/fundo baseado na caixa inteira */
+  bottom: 100%;       /* Fica exatamente acima do topo da caixa */
+  margin-bottom: 10px; /* Pequeno espaçamento para não colar na borda */
+  left: 50%;          
+  transform: translateX(-50%) translateY(10px); 
+  
+  /* Visual Temático Cósmico */
+  background: rgba(10, 5, 22, 0.95);
+  color: #e0aaff;
+  border: 1px solid #9d4edd;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  white-space: nowrap; 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6), 0 0 10px rgba(157, 78, 221, 0.3);
+  
+  /* Efeito de Transição (Escondido) */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+/* 3. Pequena seta na parte inferior do pop-up */
+.prestigio-info::after {
+  content: "";
+  position: absolute;
+  top: 100%;         
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #9d4edd transparent transparent transparent; 
+}
+
+/* 4. MODIFICADO: Ativação ao passar o mouse na CAIXA (.barra-prestigio-box) */
+.barra-prestigio-box:hover .prestigio-info {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0); 
+}
+
+.barra-prestigio-box {
+  position: relative;      
+}
+
+/* 2. Estilização e posicionamento do Pop-up (Escondido por padrão) */
+.prestigio-info {
+  position: absolute;
+  bottom: 100%;       /* Posiciona exatamente acima da caixa inteira */
+  left: 50%;          /* Move para o centro horizontal */
+  transform: translateX(-50%) translateY(10px); /* Centraliza e joga um pouco para baixo */
+  margin-bottom: 12px; /* Distância de segurança da borda da caixa */
+  
+  /* Visual Temático Cósmico */
+  background: rgba(10, 5, 22, 0.98);
+  color: #e0aaff;
+  border: 1px solid #9d4edd;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  white-space: nowrap; /* Evita quebra de linha text-wrap */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7), 0 0 10px rgba(157, 78, 221, 0.4);
+  
+  /* Estado inicial invisível com transição suave */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 100;
+}
+
+/* 3. Pequena seta indicativa na base do pop-up */
+.prestigio-info::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* Fixado na parte de baixo do balão */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: #9d4edd transparent transparent transparent; /* Aponta para baixo */
+}
+
+/* 4. Ativação do Pop-up: surge ao passar o mouse na caixa inteira */
+.barra-prestigio-box:hover .prestigio-info {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0); /* Sobe suavemente para a posição final */
 }

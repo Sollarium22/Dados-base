@@ -20,8 +20,33 @@ import pata from './pata.png';
 function App() {
   const b_novato = 0.5;
   const b_guerreiro = 1;
-  const b_mago = 5;
+  const b_mago = 50000;
   const b_medico = 15;
+
+
+//TESTE seguir MOUSE
+
+const botoesComPopup = document.querySelectorAll('.secao-construcao button, .secao-upgrade button');
+
+botoesComPopup.forEach(botao => {
+  const popup = botao.querySelector('.popup-info');
+  if (!popup) return;
+
+  botao.addEventListener('mouseenter', () => {
+    // Pega a posição exata do botão na tela atual
+    const rect = botao.getBoundingClientRect();
+    
+    // Alinha o pop-up à esquerda do botão (subtraindo a largura dele + margem)
+    popup.style.left = `${rect.left - 255}px`; // 220px de largura + 15px de distância
+    popup.style.top = `${rect.top - 10}px`;
+    popup.style.display = 'block';
+  });
+
+  botao.addEventListener('mouseleave', () => {
+    popup.style.display = 'none';
+  });
+});
+
 
  
   const [preco, setPreco] = useState(15);// preco
@@ -31,7 +56,7 @@ function App() {
     { nome: "Mago", preco: 10, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
     { nome: "Medico de Campo", preco: 2000, dps: b_medico, quantidade: 0, icone: cajado, descricao: "ENTÃO SÓ SE MATA", assin: "- Leandrinho do Grau" },
     { nome: "Pugilista", preco: 2000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "VEM PRA CIMA, EU TANKO", assin: "- Jurandir  (spoiler, ele nao tanka)" },
-    // { nome: "Lo testador", preco: 10000000000000000, dps: 101000000000, quantidade: 0, icone: dado, descricao:"ABSOLUTA", assin: "SIM"}, <---- demonstração
+    //{ nome: "Lo testador", preco: 10000000000000000, dps: 101000000000, quantidade: 0, icone: dado, descricao:"ABSOLUTA", assin: "SIM"}, 
   ]
 
   const DEFAULT_MELHORIAS = [
@@ -52,6 +77,8 @@ function App() {
   const [click, setClick] = useState(1); // clic
   const [construcoes, setConstrucoes] = useState(DEFAULT_CONSTRUCOES);
   const [upgrade, setUpgrade] = useState(DEFAULT_MELHORIAS);
+
+  const [contagemTotal, setContagemTotal] = useState(0)// TODOS JA CONSEGUIDOS
   // =============================SIMPLIFICADOR DE NUMEROS================================
   function formatarNumero(num) {
     if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
@@ -92,31 +119,48 @@ function App() {
     }
   }, [construcoes])
 
+    // ------------------------------------ASCENCAO--------------------------------------
+  const [ascensao, setAscensao] = useState({
+    desbloqueado: true,
+    prestigio: 0
+  })
+
+  const [telaAtual, setTelaAtual] = useState("jogo"); //Telas: jogo, ascensao, conquistas
+
+  
+
+//------------------------------------------------------------------------------------------
   //os numeros que surgem do cookie
   const [numeirinhos, setNumeirinhos] = useState([]);
   const [HistoricoVinho, setHistoricoVinho] = useState([]);
 
   function contarDado() {
-    setContagem(contagem + click);
-
+    setContagem((anterior) => anterior + clickRef.current);
+    setContagemTotal((anterior) => anterior + clickRef.current);
   }
+
+
+
 
 
   // ===================================== SAVES===================================
   // Referencias
   const contagemRef = useRef(contagem);
+  const contagemTotalRef = useRef(contagemTotal);
   const clickRef = useRef(click);
   const construcoesRef = useRef(construcoes);
   const upgradeRef = useRef(upgrade);
   const vinhoRef = useRef(vinho)
+  const ascensaoRef = useRef(ascensao)
 
   // Sincronia de referencias
   useEffect(() => { contagemRef.current = contagem; }, [contagem]);
+  useEffect(() => { contagemTotalRef.current = contagemTotal; }, [contagemTotal]);
   useEffect(() => { clickRef.current = click; }, [click]);
   useEffect(() => { construcoesRef.current = construcoes; }, [construcoes]);
   useEffect(() => { upgradeRef.current = upgrade }, [upgrade]);
   useEffect(() => { vinhoRef.current = vinho }, [vinho]);
-
+  useEffect(() => { ascensaoRef.current = ascensao }, [ascensao]);
 
   //SAVES
   useEffect(() => {
@@ -129,10 +173,12 @@ function App() {
           const saveSeguro = processarSave(dadosBrutos, construcoes, upgrade)
 
           setContagem(saveSeguro.contagem ?? 0);
+          setContagemTotal(saveSeguro.contagemTotal ?? 0);
           setClick(saveSeguro.click ?? []);
           setConstrucoes(saveSeguro.construcoes ?? []);
           setUpgrade(saveSeguro.upgrade ?? []);
           setVinho(saveSeguro.vinho ?? []);
+          setAscensao(saveSeguro.ascensao ?? []);
 
       } catch (e){
         console.error("Falha ao processar o auto-save", e)
@@ -148,8 +194,10 @@ function App() {
       const saveData = {
         version: VERSAO_ATUAL,
         contagem: contagemRef.current,
+        contagemTotal: contagemTotalRef.current,
         click: clickRef.current,
         vinho: vinhoRef.current,
+        ascensao: ascensaoRef.current,
 
         //aplicacao pratica: apenas a quantidade / se é comprad e id
         construcoes: construcoesRef.current.map(c => ({nome: c.nome, quantidade: c.quantidade})),
@@ -157,7 +205,7 @@ function App() {
       };
       localStorage.setItem("QuickSave", JSON.stringify(saveData));
       console.log(saveData);
-    }, 60000);
+    }, 1000);
     return () => clearInterval(autoSave);
   }, []);
 
@@ -166,7 +214,10 @@ function App() {
     const saveData = {
       version: VERSAO_ATUAL,
       contagem: contagemRef.current,
+      contagemTotal: contagemTotalRef.current,
       click: clickRef.current,
+      vinho: vinhoRef.current,
+      ascensao: ascensaoRef.current,
       //aplicacao pratica: apenas a quantidade / se é comprad e id
       construcoes: construcoesRef.current.map(c => ({nome: c.nome, quantidade: c.quantidade})),
       upgrade: upgradeRef.current.map(u => ({ id: u.id, comprado: u.comprado})) 
@@ -194,9 +245,12 @@ function App() {
       const saveSeguro = processarSave(dadosBrutos, construcoes, upgrade);
 
       setContagem(saveSeguro.contagem );
+      setContagemTotal(saveSeguro.contagemTotal );
       setClick(saveSeguro.click );
       setConstrucoes(saveSeguro.construcoes );
       setUpgrade(saveSeguro.upgrade );
+      setVinho(saveSeguro.vinho);
+      setAscensao(saveSeguro.ascensao);
 
     } catch {
       alert("Erro ao carregar o save");
@@ -237,6 +291,7 @@ function App() {
       const producao = construcoes.reduce((soma, c) => soma + c.dps * c.quantidade, 0)
       setDps(producao);
       setContagem((atual) => atual + producao / 10);
+      setContagemTotal((atual) => atual + producao / 10);
     }, 100); //a cada 1 segundo roda aqui
     return () => clearInterval(timer);//limpa o timer
   }, [construcoes]);
@@ -322,6 +377,7 @@ function App() {
     const ganhoVinho = moedaInteiras * valorAtualVinho;
 
     setContagem(c => c + ganhoVinho);
+    setContagemTotal(c => c + ganhoVinho);
     setVinho(prev => ({
       ...prev,
       creditos: prev.creditos - moedaInteiras
@@ -424,6 +480,25 @@ function App() {
     )
   }
 
+  // ASCENCAO PARTE 2
+
+  const PRIMEIRO_PRESTIGIO = 1_000_000;
+
+  function calcularPrestigio(c) {
+    return Math.floor(Math.sqrt(c / PRIMEIRO_PRESTIGIO));
+  }
+
+  const prestigioPossivel = calcularPrestigio(contagemTotal);
+
+  // BARRA DE PROGRESSO:
+
+  const contagemAtual = contagemTotal;
+  const contagemPrestigioAtual = PRIMEIRO_PRESTIGIO * (prestigioPossivel ** 2);
+  const contagemProximoPrestigio = PRIMEIRO_PRESTIGIO * ((prestigioPossivel + 1) ** 2);
+
+  const progresso = (contagemAtual - contagemPrestigioAtual) / (contagemProximoPrestigio - contagemPrestigioAtual);
+  const progressoPorcentagem = Math.min(Math.max(progresso, 0), 1);
+
 
   //================================== BASE DE UPGRADES ==================
   const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
@@ -472,7 +547,8 @@ function App() {
       <div className="jogo">
         <div class="lado-esquerdo">
 
-          {vinho.desbloqueado && (
+          
+          {vinho.desbloqueado && telaAtual === "jogo" && (
             <div className='secao-le-dougles'>
               <h2> Le Dougles </h2>
 
@@ -499,13 +575,87 @@ function App() {
                 Vender Vinho
               </button>
             </div>
-
           )}
+
+          {telaAtual === "jogo" && (
+            <div className='secao-ascensao'>
+              <h2>Pilares da Criação</h2> 
+              <p> Os pilares observam </p>
+
+              <div className='barra-prestigio-box'> 
+                <div className='barra-prestigio-header'> 
+                  <span>Prestigio ao Ascender</span>
+                  <strong>+ {prestigioPossivel}</strong>
+                </div>
+
+                <div className='barra-prestigio-fora'>
+                  <div className='barra-prestigio-dentro' 
+                  style={{ width: `${progressoPorcentagem * 100}%`}}/> 
+                </div>
+                <div className='prestigio-info'>
+                {formatarNumero(contagemProximoPrestigio - contagemTotal)} até o proximo nivel
+              </div>
+              </div>
+
+              
+
+              <button className='portao-ascensao'
+                onClick={() => setTelaAtual("ascensao")}>
+                Entrar nos pilares
+              </button>
+            </div>
+          )}
+          {telaAtual === "ascensao" && (
+             <div className='secao-ascensao'>
+              <h2>Pilares da Criação</h2> 
+              <p> Os pilares observam </p>
+
+
+              <button className='portao-ascensao'
+                onClick={() => setTelaAtual("jogo")}>
+                Sair nos pilares
+              </button>
+            </div>
+          )}
+
+         {telaAtual === "ascensao" && (
+  <div className="overlay-ascensao">
+    <div className="janela-ascensao">
+      
+      {/* Botão de Voltar no topo superior */}
+      <button className="botao-voltar-ascensao" onClick={() => setTelaAtual("jogo")}>
+        ← Voltar
+      </button>
+
+      {/* Conteúdo Central */}
+      <h2 className="titulo-ascensao">Pilares da Criação</h2>
+
+     
+        
+      
+      <div className="painel-prestigio">
+        <span>Prestígio Atual</span>
+        <strong>0</strong>
+      </div>
+
+    </div>
+  </div>
+)}
+
         </div>
+      
+     
+     
+
+
+        {/* DADO*/ }
+      {telaAtual == "jogo" && (
+        
         <div class="secao-dado">
 
           <h1>Buxas Clicker</h1>
           <h2>Total de numeros: {formatarNumero(contagem)}</h2>
+          <h2>Total REAL DE DAOS: {formatarNumero(contagemTotal)}</h2>
           <h3>DPS: {DPS.toFixed(1)}</h3>
           <motion.img
             id="dadoP"
@@ -556,8 +706,10 @@ function App() {
 
 
         </div>
+      
+      )}
 
-
+      {telaAtual === "jogo" && (
 
         <div class="lado-direito">
 
@@ -611,7 +763,7 @@ function App() {
           </div>
 
         </div>
-
+      )}
 
 
 
