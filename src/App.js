@@ -733,7 +733,7 @@ botoesComPopup.forEach(botao => {
             }}>Resetar</button>
           </div>
 
-
+            <p>Versao: {VERSAO_ATUAL}</p>
         </div>
       
       )}
