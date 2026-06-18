@@ -29,20 +29,20 @@ export const DEFAULT_SAVE = {
         distritoBase: {
             aberto: false,
             upgrades: [
-                { nome: "Começo", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio" }
+                {id: "ascensaodps", comprado: false }
             ]
         },
 
         distritoAscensao: {
             aberto: false,
             upgrades: [
-                { nome: "Tempo", preco: 1, efeito: "duplicarClick", id: "ascensao1", comprado: false, descricao: "Você duplica seu Click" }
+                { id: "ascensao1", comprado: false}
             ]
         },
         distritoOrdem: {
             aberto: false,
             upgrades: [
-                { nome: "Novato Transcendido", preco: 1, efeito: "novatoGratis", id: "ordem1", comprado: false, descricao: "Você Ganha 10 novatos gratis" }
+                { id: "ordem1", comprado: false}
             ]
         },
         distritoReliquias: {
@@ -92,7 +92,7 @@ const migracoes = {
         }
     },
     1.2: (saveAntigo) => {
-        console.log("Migrando sabe da versao 1.2 para versao 1.3")
+        console.log("Migrando save da versao 1.2 para versao 1.3")
 
         const ascensaoAtt1 = {
             ...saveAntigo.ascensao,  //
@@ -101,20 +101,20 @@ const migracoes = {
             distritoBase: {
                 aberto: false,
                 upgrades: [
-                    { nome: "Começo", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio" }
+                    { id: "ascensaodps", comprado: false}
                 ]
             },
 
             distritoAscensao: {
                 aberto: false,
                 upgrades: [
-                    { nome: "Tempo", preco: 1, efeito: "duplicarClick", id: "ascensao1", comprado: false, descricao: "Você duplica seu Click" }
+                    {id: "ascensao1", comprado: false}
                 ]
             },
             distritoOrdem: {
                 aberto: false,
                 upgrades: [
-                    { nome: "Novato Transcendido", preco: 1, efeito: "novatoGratis", id: "ordem1", comprado: false, descricao: "Você Ganha 10 novatos gratis" }
+                    {id: "ordem1", comprado: false}
                 ]
             },
             distritoReliquias: {
@@ -127,7 +127,7 @@ const migracoes = {
         }
         return {
             ...saveAntigo,
-            versao:1.3,
+            version:1.3,
             ascensao: ascensaoAtt1
         }
     }
