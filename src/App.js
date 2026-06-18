@@ -122,7 +122,8 @@ botoesComPopup.forEach(botao => {
     // ------------------------------------ASCENCAO--------------------------------------
   const [ascensao, setAscensao] = useState({
     desbloqueado: false,
-    prestigio: 0
+    prestigio: 0,
+    prestigioTotal: 0,
   })
 
   const [telaAtual, setTelaAtual] = useState("jogo"); //Telas: jogo, ascensao, pilares, conquistas,
@@ -263,8 +264,8 @@ botoesComPopup.forEach(botao => {
       setVinho(saveSeguro.vinho);
       setAscensao(saveSeguro.ascensao);
 
-    } catch {
-      alert("Erro ao carregar o save");
+    } catch(e) {
+      alert("Erro ao carregar o save" + e);
     }
 
   }
@@ -497,7 +498,8 @@ botoesComPopup.forEach(botao => {
     return Math.floor(Math.sqrt(c / PRIMEIRO_PRESTIGIO));
   }
 
-  const prestigioPossivel = calcularPrestigio(contagemTotal);
+  const prestigioTotalV = calcularPrestigio(contagemTotal)
+  const prestigioPossivel = prestigioTotalV - ascensao.prestigioTotal;
 
   // BARRA DE PROGRESSO:
 

@@ -20,12 +20,22 @@ export const DEFAULT_SAVE = {
         { id: "dados2", comprado: false }
     ],
     vinho: { desbloqueado: false, level: 1, creditos: 0, mercado: 1 },
-    ascensao: {desbloqueado: false, prestigio: 0}, 
+    ascensao: {desbloqueado: false, prestigio: 0, prestigioTotal: 0,}, 
 };
 
 const migracoes = {
     // Exemplo futuro:
     // 1: (save) => { return { ...save, version: 2, novaPropriedade: 0 } }
+    0: (saveAntigo) => {
+        console.log("Migrando save da versao 0 para versao 1");
+        
+        return {
+             ...saveAntigo,
+             version: 1,
+             //construcoes: construcoesAtualizadas
+         }
+    },
+
     1: (saveAntigo) => {
         console.log("Migrando save da versao 1 para versao 1.1");
 
@@ -33,19 +43,21 @@ const migracoes = {
         //     ...saveAntigo.construcoes,
         //     { nome: "Lo testador", quantidade: 0 }
         // ]
-        // return {
-        //     ...saveAntigo,
-        //     version: 2,
-        //     construcoes: construcoesAtualizadas
-        // }
+          return {
+             ...saveAntigo,
+             version: 1.1,
+             //construcoes: construcoesAtualizadas
+         }
     
 
     },
     1.1: (saveAntigo) => {
+        console.log("Migrando save da versao 1.1 para versao 1.2");
         return {
             ...saveAntigo,
-            versao: 1.2,
-            ascensao: {desbloqueado: false, prestigio: 0},
+            version: 1.2,
+            ascensao: {desbloqueado: false, prestigio: 0, prestigioTotal: 0},
+            contagemTotal: 0,
         }
     },
 
@@ -78,17 +90,25 @@ function normalizeUpgrades(saved = [], defaults) {
 // Junta a lógica de ler o objeto bruto, rodar migrações e normalizar propriedades
 export function processarSave(saveCarregado, defaultsConstrucoes, defaultsUpgrades) {
     let currentVersion = saveCarregado.version ?? 0;
+     let iterations = 0;
 
     // 1. Roda a esteira de migrações passo a passo
-    while (currentVersion < VERSAO_ATUAL) {
+    while (currentVersion < VERSAO_ATUAL && iterations < 50) {
+        iterations++;
+        
         const migration = migracoes[currentVersion];
         if (!migration) {
-            // Se não há migração registrada para este ponto, força a atualização do número
             saveCarregado.version = VERSAO_ATUAL;
             break;
         }
+        
         saveCarregado = migration(saveCarregado);
         currentVersion = saveCarregado.version;
+    }
+
+    if (iterations >= 50) {
+        console.error("Loop de migração detectado e interrompido por segurança!");
+        saveCarregado.version = VERSAO_ATUAL; // Força para não travar o jogo
     }
 
     // 2. Normaliza para evitar problemas com ícones/descrições atualizadas
