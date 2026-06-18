@@ -14,44 +14,47 @@ import arco from './arco.png';
 import cajado from './cajado.png';
 import pata from './pata.png';
 
-//Icons dados
+//Icons Distritos
+
+import ordem from './Ordem.png';
+import ray from './Ray.png';
 
 
 function App() {
   const b_novato = 0.5;
   const b_guerreiro = 1;
-  const b_mago = 50000;
+  const b_mago = 100_000;
   const b_medico = 15;
 
 
-//TESTE seguir MOUSE
+  //TESTE seguir MOUSE
 
-const botoesComPopup = document.querySelectorAll('.secao-construcao button, .secao-upgrade button');
+  const botoesComPopup = document.querySelectorAll('.secao-construcao button, .secao-upgrade button');
 
-botoesComPopup.forEach(botao => {
-  const popup = botao.querySelector('.popup-info');
-  if (!popup) return;
+  botoesComPopup.forEach(botao => {
+    const popup = botao.querySelector('.popup-info');
+    if (!popup) return;
 
-  botao.addEventListener('mouseenter', () => {
-    // Pega a posição exata do botão na tela atual
-    const rect = botao.getBoundingClientRect();
-    
-    // Alinha o pop-up à esquerda do botão (subtraindo a largura dele + margem)
-    popup.style.left = `${rect.left - 255}px`; // 220px de largura + 15px de distância
-    popup.style.top = `${rect.top - 10}px`;
-    popup.style.display = 'block';
+    botao.addEventListener('mouseenter', () => {
+      // Pega a posição exata do botão na tela atual
+      const rect = botao.getBoundingClientRect();
+
+      // Alinha o pop-up à esquerda do botão (subtraindo a largura dele + margem)
+      popup.style.left = `${rect.left - 255}px`; // 220px de largura + 15px de distância
+      popup.style.top = `${rect.top - 10}px`;
+      popup.style.display = 'block';
+    });
+
+    botao.addEventListener('mouseleave', () => {
+      popup.style.display = 'none';
+    });
   });
 
-  botao.addEventListener('mouseleave', () => {
-    popup.style.display = 'none';
-  });
-});
 
 
- 
   const [preco, setPreco] = useState(15);// preco
   const DEFAULT_CONSTRUCOES = [
-    { nome: "Novato", preco: 15, dps: b_novato, quantidade: 0, icone: galho, descricao: "Ele...era...o FrostBite...", assin: "- Chris...pré depressão" },
+    { nome: "Novato", preco: 15, dps: b_novato, quantidade: 0, quantidadeGratis: 0, icone: galho, descricao: "Ele...era...o FrostBite...", assin: "- Chris...pré depressão" },
     { nome: "Guerreiro", preco: 100, dps: b_guerreiro, quantidade: 0, icone: espada, descricao: "Um Guerreiro nao muito habilidoso...bem...ele sabe usar a espada pra fazer um churrasco" },
     { nome: "Mago", preco: 10, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
     { nome: "Medico de Campo", preco: 2000, dps: b_medico, quantidade: 0, icone: cajado, descricao: "ENTÃO SÓ SE MATA", assin: "- Leandrinho do Grau" },
@@ -62,12 +65,16 @@ botoesComPopup.forEach(botao => {
   const DEFAULT_MELHORIAS = [
     { nome: "Afiação", preco: "10", efeito: "duplicarClick", comprado: false, id: "click1", icone: dodo, descricao: "Uma pedra de amolar fodasse para vc só usar pra ajudar um pouco" },
     { nome: "Mochila de Equipamentos", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados1", icone: dodo },
-    { nome: "Espada Nova", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados2", icone: dodo }
-  ] 
+    { nome: "Espada Nova", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados2", icone: dodo },
+
+    { nome: "Mega espada", preco: "10", efeito: "clickDps", comprado: false, id: "clickDps1", icone: dodo, descricao: "Sua espada propria agora da 1% de seu DPS" }
+  ]
+
+  const DEFAULT_VINHO = { desbloqueado: false, level: 1, creditos: 0, mercado: 1 }
 
   // FUNCAO PARA CALCULAR O PRECO ATUAL DE CADA CONSTRUCAO
 
-  function getPrecoAtual(precoBase, quantidade){
+  function getPrecoAtual(precoBase, quantidade) {
     return Math.floor(precoBase * Math.pow(1.2, quantidade));
   }
 
@@ -79,6 +86,7 @@ botoesComPopup.forEach(botao => {
   const [upgrade, setUpgrade] = useState(DEFAULT_MELHORIAS);
 
   const [contagemTotal, setContagemTotal] = useState(0)// TODOS JA CONSEGUIDOS
+
   // =============================SIMPLIFICADOR DE NUMEROS================================
   function formatarNumero(num) {
     if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
@@ -101,12 +109,9 @@ botoesComPopup.forEach(botao => {
   }
 
   // ============================MINIGAMES==================================
-  const [vinho, setVinho] = useState({
-    desbloqueado: false,
-    level: 1,
-    creditos: 0,
-    mercado: 1
-  })
+  const [vinho, setVinho] = useState(DEFAULT_VINHO)
+
+
 
   useEffect(() => {
     const vinheiro = construcoes.find(c => c.nome === "Mago");
@@ -119,12 +124,41 @@ botoesComPopup.forEach(botao => {
     }
   }, [construcoes])
 
-    // ------------------------------------ASCENCAO--------------------------------------
-  const [ascensao, setAscensao] = useState({
+  // ------------------------------------ASCENCAO--------------------------------------
+
+  const DEFAULT_ASCENSAO = {
     desbloqueado: false,
     prestigio: 0,
     prestigioTotal: 0,
-  })
+
+    distritoBase: {
+      aberto: false,
+      upgrades: [
+        { nome: "Começo", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio" }
+      ]
+    },
+
+    distritoAscensao: {
+      aberto: false,
+      upgrades: [
+        { nome: "Tempo", preco: 1, efeito: "duplicarClick", id: "ascensao1", comprado: false, descricao: "Você duplica seu Click" }
+      ]
+    },
+    distritoOrdem: {
+      aberto: false,
+      upgrades: [
+        { nome: "Novato Transcendido", preco: 1, efeito: "novatoGratis", id: "ordem1", comprado: false, descricao: "Você Ganha 10 novatos gratis" }
+      ]
+    },
+    distritoReliquias: {
+      aberto: false,
+    },
+    distritoRayboom: {
+      aberto: false,
+    }
+  }
+
+  const [ascensao, setAscensao] = useState(DEFAULT_ASCENSAO)
 
   const [telaAtual, setTelaAtual] = useState("jogo"); //Telas: jogo, ascensao, pilares, conquistas,
 
@@ -139,9 +173,9 @@ botoesComPopup.forEach(botao => {
     }
   }, [construcoes])
 
-  
 
-//------------------------------------------------------------------------------------------
+
+  //------------------------------------------------------------------------------------------
   //os numeros que surgem do cookie
   const [numeirinhos, setNumeirinhos] = useState([]);
   const [HistoricoVinho, setHistoricoVinho] = useState([]);
@@ -149,6 +183,7 @@ botoesComPopup.forEach(botao => {
   function contarDado() {
     setContagem((anterior) => anterior + clickRef.current);
     setContagemTotal((anterior) => anterior + clickRef.current);
+
   }
 
 
@@ -180,22 +215,22 @@ botoesComPopup.forEach(botao => {
 
     if (salvamento) {
       try {
-          const dadosBrutos = JSON.parse(salvamento);
+        const dadosBrutos = JSON.parse(salvamento);
 
-          const saveSeguro = processarSave(dadosBrutos, construcoes, upgrade)
+        const saveSeguro = processarSave(dadosBrutos, construcoes, upgrade)
 
-          setContagem(saveSeguro.contagem ?? 0);
-          setContagemTotal(saveSeguro.contagemTotal ?? 0);
-          setClick(saveSeguro.click ?? []);
-          setConstrucoes(saveSeguro.construcoes ?? []);
-          setUpgrade(saveSeguro.upgrade ?? []);
-          setVinho(saveSeguro.vinho ?? []);
-          setAscensao(saveSeguro.ascensao ?? []);
+        setContagem(saveSeguro.contagem ?? 0);
+        setContagemTotal(saveSeguro.contagemTotal ?? 0);
+        setClick(saveSeguro.click ?? []);
+        setConstrucoes(saveSeguro.construcoes ?? []);
+        setUpgrade(saveSeguro.upgrade ?? []);
+        setVinho(saveSeguro.vinho ?? []);
+        setAscensao(saveSeguro.ascensao ?? []);
 
-      } catch (e){
+      } catch (e) {
         console.error("Falha ao processar o auto-save", e)
       }
-     
+
     }
   }, [])
 
@@ -212,8 +247,8 @@ botoesComPopup.forEach(botao => {
         ascensao: ascensaoRef.current,
 
         //aplicacao pratica: apenas a quantidade / se é comprad e id
-        construcoes: construcoesRef.current.map(c => ({nome: c.nome, quantidade: c.quantidade})),
-        upgrade: upgradeRef.current.map(u => ({ id: u.id, comprado: u.comprado}))  
+        construcoes: construcoesRef.current.map(c => ({ nome: c.nome, quantidade: c.quantidade })),
+        upgrade: upgradeRef.current.map(u => ({ id: u.id, comprado: u.comprado }))
       };
       localStorage.setItem("QuickSave", JSON.stringify(saveData));
       console.log(saveData);
@@ -231,16 +266,16 @@ botoesComPopup.forEach(botao => {
       vinho: vinhoRef.current,
       ascensao: ascensaoRef.current,
       //aplicacao pratica: apenas a quantidade / se é comprad e id
-      construcoes: construcoesRef.current.map(c => ({nome: c.nome, quantidade: c.quantidade})),
-      upgrade: upgradeRef.current.map(u => ({ id: u.id, comprado: u.comprado})) 
+      construcoes: construcoesRef.current.map(c => ({ nome: c.nome, quantidade: c.quantidade })),
+      upgrade: upgradeRef.current.map(u => ({ id: u.id, comprado: u.comprado }))
     }
     const saveTexto = JSON.stringify(saveData);
 
     const saveEncriptado = encodeURIComponent(saveTexto)
 
     navigator.clipboard.writeText(saveEncriptado)
-    .then(() => alert("Salvamento copiado com sucesso!"))
-    .catch(() => alert("Erro ao copiar o save"));
+      .then(() => alert("Salvamento copiado com sucesso!"))
+      .catch(() => alert("Erro ao copiar o save"));
   }
 
   //importando
@@ -248,7 +283,7 @@ botoesComPopup.forEach(botao => {
     const inputImportar = prompt("Coloque o save Abaixo:");
     if (!inputImportar) return;
 
-    
+
 
     try {
       const decodeSave = decodeURIComponent(inputImportar);
@@ -256,15 +291,15 @@ botoesComPopup.forEach(botao => {
 
       const saveSeguro = processarSave(dadosBrutos, construcoes, upgrade);
 
-      setContagem(saveSeguro.contagem );
-      setContagemTotal(saveSeguro.contagemTotal );
-      setClick(saveSeguro.click );
-      setConstrucoes(saveSeguro.construcoes );
-      setUpgrade(saveSeguro.upgrade );
+      setContagem(saveSeguro.contagem);
+      setContagemTotal(saveSeguro.contagemTotal);
+      setClick(saveSeguro.click);
+      setConstrucoes(saveSeguro.construcoes);
+      setUpgrade(saveSeguro.upgrade);
       setVinho(saveSeguro.vinho);
       setAscensao(saveSeguro.ascensao);
 
-    } catch(e) {
+    } catch (e) {
       alert("Erro ao carregar o save" + e);
     }
 
@@ -272,16 +307,50 @@ botoesComPopup.forEach(botao => {
 
   // =====================================EFEITO DE UPGRADES/COMPRAS==========================================
 
+  //CLICK DPS
+
+  function clickPorDps(upgrade, ascensao) {
+    let total = 0;
+
+    total += upgrade.filter(m => m.efeito === 'clickDps' && m.comprado).length * 0.02;
+
+    Object.values(ascensao).forEach(distrito => {
+      if (!distrito?.upgrades) return;
+
+      distrito.upgrades.forEach(u => {
+        if (u.comprado && u.efeito === 'clickDps') {
+          total += 0.01;
+        }
+      })
+    })
+
+    return total;
+  }
+
+  
+
+
+  //USEFECT DE UPGRADES
   useEffect(() => {
 
     //Multiplicadores comparar quantos tem
-    const multiplicador = upgrade.filter(u => u.efeito === "duplicarClick" && u.comprado).length;
-    const mult_dado = upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length;
+    const mult_click = upgrade.filter(u => u.efeito === "duplicarClick" && u.comprado).length;
+    const clickBaseFinal = 2 ** mult_click
+
 
     // calculo de multiplicador
-    const novoClick = 1 * (2 ** multiplicador);
-    const novoDado = b_novato * (2 ** mult_dado);
-    setClick(novoClick);
+    const percentual = clickPorDps(upgrade, ascensao);
+
+    const bonusPorDps = DPS * percentual;
+    //TALVEZ...MULTIPLIQUE NO LUGAR DE SOMAR
+    const clickFinal = clickBaseFinal + bonusPorDps;
+
+    setClick(clickFinal);
+
+
+    //DUPLICA PRIMEIRA CONSTRUCAO
+    const mult_novato = upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length;
+    const novoDado = b_novato * (2 ** mult_novato);
 
     setConstrucoes((anterior) =>
       anterior.map((c) => {
@@ -292,13 +361,53 @@ botoesComPopup.forEach(botao => {
       })
     )
 
-  }, [upgrade])
+  }, [upgrade, DPS])
 
 
-  // TEMPO DO JOGO
+
+
+  //UPGRADES ASCENSAO:
+  useEffect(()=> {
+    const novatoGratis = ascensao.distritoOrdem.upgrades.filter(u => u.efeito === "novatoGratis" && u.comprado).length;
+    
+    setConstrucoes(anterior => 
+      anterior.map(c => 
+        c.nome === "Novato"
+          ? {
+            ...c,
+            quantidadeGratis: novatoGratis * 10
+          }
+          :c
+      )
+    );
+
+    
+    
+
+
+
+  }, [ascensao])
+
+  //DPS DA CONSTRUCAO
+  function dpsConstrucao(c){
+    return c.dps;
+  }
+
+  // TEMPO DO JOGO E CONSTRUCOES
   useEffect(() => {
     const timer = setInterval(() => {
-      const producao = construcoes.reduce((soma, c) => soma + c.dps * c.quantidade, 0)
+
+      const producaoBase = construcoes.reduce((soma, c) =>{
+        const quantidadeTotal = c.quantidade + (c.quantidadeGratis || 0)
+        return soma + dpsConstrucao(c) * quantidadeTotal;
+        }, 0);
+      
+      const dspAscensaoAtivo = ascensao.distritoBase.upgrades.filter(u => u.efeito === "ascensaodps" && u.comprado);
+        // O ? é a simplificacao do if Else, IF - ?, Else - :
+      const multiplicadorPrestigio = dspAscensaoAtivo ? 1 + ascensao.prestigioTotal * 0.01 : 1
+
+      const producao = producaoBase * multiplicadorPrestigio;
+
       setDps(producao);
       setContagem((atual) => atual + producao / 10);
       setContagemTotal((atual) => atual + producao / 10);
@@ -329,7 +438,7 @@ botoesComPopup.forEach(botao => {
     setConstrucoes((anterior) => {
       const novo = anterior.map((c, i) => {
         const precoAtual = getPrecoAtual(c.preco, c.quantidade);
-        
+
         if (contagem >= precoAtual && i === indice) {
           setContagem(contagem - precoAtual);
           return {
@@ -373,11 +482,11 @@ botoesComPopup.forEach(botao => {
         creditos: prev.creditos + prev.level * 0.0003
       }));
     }, 100)
-   
+
 
     return () => clearInterval(timer);
   }, [vinho.desbloqueado, vinho.level]);
- //ok
+  //ok
 
 
   function venderVinho() {
@@ -392,7 +501,7 @@ botoesComPopup.forEach(botao => {
       ...prev,
       creditos: prev.creditos - moedaInteiras
     }));
-      //daria pra mostrar um aviso aqui e pá
+    //daria pra mostrar um aviso aqui e pá
   }
 
   //MERCADO DE ACOES DE VINHOS
@@ -401,7 +510,7 @@ botoesComPopup.forEach(botao => {
 
     const timer = setInterval(() => {
 
-      const mudanca = (Math.random() - 0.5)*0.2;
+      const mudanca = (Math.random() - 0.5) * 0.2;
       let novoMercado = vinho.mercado + mudanca;
 
       novoMercado = Math.max(0.01, Math.min(100, novoMercado))
@@ -411,9 +520,10 @@ botoesComPopup.forEach(botao => {
         return {
           ...prev,
           mercado: Number(novoMercado.toFixed(2))
-        }})
+        }
+      })
 
-        let valor = novoMercado * VINHO_BASE;
+      let valor = novoMercado * VINHO_BASE;
       //setando historico
       setHistoricoVinho(h => {
         const novo = [...h, valor];
@@ -438,40 +548,40 @@ botoesComPopup.forEach(botao => {
     const max = Math.max(...dados);
     const range = max - min || 1;
 
-    const color = dados[dados.length -1] >= dados[dados.length-2] ? "#4caf50" : "#f44336";
+    const color = dados[dados.length - 1] >= dados[dados.length - 2] ? "#4caf50" : "#f44336";
 
 
     const points = dados.map((value, i) => ({
       x: (i / (dados.length - 1)) * width,
       y: height - ((value - min) / range) * height,
-     value
+      value
     }));
 
     const labels = [
       { value: max, y: 12 },
-      { value: (max+min) / 2, y: height / 2},
-      { value: min, y: height-4}
+      { value: (max + min) / 2, y: height / 2 },
+      { value: min, y: height - 4 }
     ]
 
     return (
-      <svg width={width + 40 } height={height} style={{ background: "white", borderRadius: 6 }}>
+      <svg width={width + 40} height={height} style={{ background: "white", borderRadius: 6 }}>
 
-        {labels.map((l,i) => (
+        {labels.map((l, i) => (
           <text
             key={i}
             x={2}
             y={l.y}
             fill="#aaa"
             fontSize="10"
-            >
-              {formatarNumero(l.value)}
-            </text>
+          >
+            {formatarNumero(l.value)}
+          </text>
         ))}
 
-        {points.slice(1).map((p,i) => {
+        {points.slice(1).map((p, i) => {
           const prev = points[i];
           const color = p.value >= prev.value ? "#4caf50" : "#f44336";
-          
+
           return (
             <line
               key={i}
@@ -484,7 +594,7 @@ botoesComPopup.forEach(botao => {
             />
           );
         })}
-        
+
 
       </svg>
     )
@@ -501,31 +611,54 @@ botoesComPopup.forEach(botao => {
   const prestigioTotalV = calcularPrestigio(contagemTotal)
   const prestigioPossivel = prestigioTotalV - ascensao.prestigioTotal;
 
-  // BARRA DE PROGRESSO:
+  // BARRA DE PROGRESSO: <-- isto esta confuso arrumar adiante
 
   const contagemAtual = contagemTotal;
-  const contagemPrestigioAtual = PRIMEIRO_PRESTIGIO * (prestigioPossivel ** 2);
-  const contagemProximoPrestigio = PRIMEIRO_PRESTIGIO * ((prestigioPossivel + 1) ** 2);
+  const contagemPrestigioAtual = PRIMEIRO_PRESTIGIO * (prestigioTotalV ** 2);
+  const contagemProximoPrestigio = PRIMEIRO_PRESTIGIO * ((prestigioTotalV + 1) ** 2);
 
   const progresso = (contagemAtual - contagemPrestigioAtual) / (contagemProximoPrestigio - contagemPrestigioAtual);
   const progressoPorcentagem = Math.min(Math.max(progresso, 0), 1);
 
-  function ascender(){
-    setTelaAtual("ascensao");
+  function ascender() {
+    setTelaAtual("pilares");
     setContagem(0);
     setClick(0);
     setConstrucoes(DEFAULT_CONSTRUCOES);
     setUpgrade(DEFAULT_MELHORIAS);
-    // setVinho(DEFAULT_VINHO)
+    setVinho(DEFAULT_VINHO)
 
     setAscensao(prev => ({
       ...prev,
-      desbloqueado:true,
-      prestigio: preco.prestigio + prestigioPossivel
+      desbloqueado: true,
+      prestigio: prev.prestigio + prestigioPossivel,
+      prestigioTotal: prev.prestigioTotal + prestigioPossivel,
       //TERMINAR
     }))
   }
 
+  function comprarUpgradeAscensao(distrito, index) {
+    setAscensao(prev => {
+      const upgradeAs = prev[distrito]?.upgrades[index];
+      if (!upgradeAs) return prev;
+
+      const prestigioAtual = Number[preco.prestigio] || 0;
+      const preco = Number(upgradeAs.preco) || 0;
+
+      if (upgradeAs.comprado || prestigioAtual < preco) return prev;
+
+      return {
+        ...prev,
+        prestigio: prestigioAtual - preco,
+        [distrito]: {
+          ...prev[distrito],
+          upgrades: prev[distrito].upgrades.map((u, i) =>
+            i === index ? { ...u, comprado: true } : u
+          )
+        }
+      }
+    })
+  }
 
   //================================== BASE DE UPGRADES ==================
   const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
@@ -566,237 +699,319 @@ botoesComPopup.forEach(botao => {
       setNumeirinhos((prev) => prev.filter((t) => t.id !== id)); // faz os numeirinhos sumirem
     }, 1000) // define para eles ficarem por 1 segundo
   };
- 
+
 
   // =============================================HTML=========================================
   return (
     <div className="App">
 
       {telaAtual !== "pilares" && (
-      <div className="jogo">
-        <div class="lado-esquerdo">
+        <div className="jogo">
+          <div class="lado-esquerdo">
 
-          
-          {vinho.desbloqueado && telaAtual === "jogo" && (
-            <div className='secao-le-dougles'>
-              <h2> Le Dougles </h2>
+            {/*LE DOUGLES*/}
+            {vinho.desbloqueado && telaAtual === "jogo" && (
+              <div className='secao-le-dougles'>
+                <h2> Le Dougles </h2>
 
-              <p>Créditos: {vinho.creditos.toFixed(3)}</p> 
-              <p>Level: {vinho.level}</p>
+                <p>Créditos: {vinho.creditos.toFixed(3)}</p>
+                <p>Level: {vinho.level}</p>
 
-              <button 
-                onClick={comprarVinhoLevel}
-                disabled={contagem < precoVinhoCredito}
-              >
-                Fetilizante <br />
-                Preço: {precoVinhoCredito}
-              </button>
-              
-              <p>
-                Valor: {" "}
-                <strong>
-                  {valorAtualVinho.toLocaleString()} Coisos
-                </strong>
-              </p>
-              <GraficoVinho dados={HistoricoVinho} /> <br/>
+                <button
+                  onClick={comprarVinhoLevel}
+                  disabled={contagem < precoVinhoCredito}
+                >
+                  Fetilizante <br />
+                  Preço: {precoVinhoCredito}
+                </button>
 
-              <button onClick={venderVinho}>
-                Vender Vinho
-              </button>
-            </div>
-          )}
+                <p>
+                  Valor: {" "}
+                  <strong>
+                    {valorAtualVinho.toLocaleString()} Coisos
+                  </strong>
+                </p>
+                <GraficoVinho dados={HistoricoVinho} /> <br />
 
-          {telaAtual === "jogo" && ascensao.desbloqueado &&(
-            <div className='secao-ascensao'>
-              <h2>Pilares da Criação</h2> 
-              <p> Os pilares observam </p>
+                <button onClick={venderVinho}>
+                  Vender Vinho
+                </button>
+              </div>
+            )}
+            {/*ENTRADA POP*/}
+            {telaAtual === "jogo" && ascensao.desbloqueado && (
+              <div className='secao-ascensao'>
+                <h2>Pilares da Criação</h2>
+                <p> Os pilares observam </p>
 
-              <div className='barra-prestigio-box'> 
-                <div className='barra-prestigio-header'> 
-                  <span>Prestigio ao Ascender</span>
-                  <strong>+ {prestigioPossivel}</strong>
+                <div className='barra-prestigio-box'>
+                  <div className='barra-prestigio-header'>
+                    <span>Prestigio ao Ascender</span>
+                    <strong>+ {prestigioPossivel}</strong>
+                  </div>
+
+                  <div className='barra-prestigio-fora'>
+                    <div className='barra-prestigio-dentro'
+                      style={{ width: `${progressoPorcentagem * 100}%` }} />
+                  </div>
+                  <div className='prestigio-info'>
+
+                    {formatarNumero(contagemProximoPrestigio - contagemTotal)} até o proximo nivel
+                  </div>
                 </div>
 
-                <div className='barra-prestigio-fora'>
-                  <div className='barra-prestigio-dentro' 
-                  style={{ width: `${progressoPorcentagem * 100}%`}}/> 
+
+
+                <button className='portao-ascensao'
+                  onClick={() => setTelaAtual("ascensao")}>
+                  Entrar nos pilares
+                </button>
+              </div>
+            )}
+            {/** ENTRADA ASCENSAO */}
+            {telaAtual === "ascensao" && (
+              <div className='secao-ascensao'>
+                <h2>Pilares da Criação</h2>
+                <p> Os pilares observam </p>
+
+
+                <button className='portao-ascensao'
+                  onClick={() => setTelaAtual("jogo")}>
+                  Sair nos pilares
+                </button>
+              </div>
+            )}
+            {/** JANELA DE FAZER KABOOM */}
+            {telaAtual === "ascensao" && (
+              <div className="overlay-ascensao">
+                <div className="janela-ascensao">
+
+                  {/* Botão de Voltar no topo superior */}
+                  <button className="botao-voltar-ascensao" onClick={() => setTelaAtual("jogo")}>
+                    ← Voltar
+                  </button>
+
+                  {/* Conteúdo Central */}
+                  <h2 className="titulo-ascensao">Pilares da Criação</h2>
+
+                  <div className="painel-prestigio">
+                    <span>Prestígio Atual</span>
+                    <strong>{ascensao.prestigio}</strong>
+                  </div>
+                  <button className='botao-ascender' onClick={() => ascender()}>
+                    Fazer Kaboom
+                  </button>
+
+
                 </div>
-                <div className='prestigio-info'>
-                {formatarNumero(contagemProximoPrestigio - contagemTotal)} até o proximo nivel
               </div>
-              </div>
+            )}
 
-              
-
-              <button className='portao-ascensao'
-                onClick={() => setTelaAtual("ascensao")}>
-                Entrar nos pilares
-              </button>
-            </div>
-          )}
-          {telaAtual === "ascensao" && (
-             <div className='secao-ascensao'>
-              <h2>Pilares da Criação</h2> 
-              <p> Os pilares observam </p>
-
-
-              <button className='portao-ascensao'
-                onClick={() => setTelaAtual("jogo")}>
-                Sair nos pilares
-              </button>
-            </div>
-          )}
-
-         {telaAtual === "ascensao" && (
-          <div className="overlay-ascensao">
-          <div className="janela-ascensao">
-      
-            {/* Botão de Voltar no topo superior */}
-            <button className="botao-voltar-ascensao" onClick={() => setTelaAtual("jogo")}>
-              ← Voltar
-            </button>
-            
-            {/* Conteúdo Central */}
-            <h2 className="titulo-ascensao">Pilares da Criação</h2>
-
-        
-          
-      
-      <div className="painel-prestigio">
-        <span>Prestígio Atual</span>
-        <strong>0</strong>
-      </div>
-          <button className='botao-ascender' >
-          Fazer Kaboom
-        </button>
-
-        
-    </div>
-  </div>
-)}
-
-        </div>
-
-        {/* DADO*/ }
-      {telaAtual == "jogo" && (
-        
-        <div class="secao-dado">
-
-          <h1>Buxas Clicker</h1>
-          <h2>Total de numeros: {formatarNumero(contagem)}</h2>
-          <h2>Total REAL DE DAOS: {formatarNumero(contagemTotal)}</h2>
-          <h3>DPS: {DPS.toFixed(1)}</h3>
-          <motion.img
-            id="dadoP"
-            src={dado}
-            onClick={Clicar}
-            animate={controls}
-            WhileHover={{
-              scale: 1.1,
-              filter: "brightness(1.1)",
-              transition: { duration: 0.3, repeat: Infinity, repeatType: "reverse" },
-            }}
-
-            style={{ width: "300px", cursor: "pointer", borderRadius: "0%", userSelect: "none", }}
-          />
-
-          {numeirinhos.map((text) => (
-            <motion.div
-              key={text.id}
-              initial={{ opacity: 1, y: 0 }}
-              animate={{ opacity: 0, y: -50 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              style={{
-                position: "absolute",
-                left: text.x,
-                top: text.y,
-                transform: "translate(-50%, -50%)",
-                color: "#fff",
-                fontSize: "20px",
-                fontWeight: "bold",
-                textShadow: "0 0 5px black",
-                pointerEvents: "none",
-              }}
-            >
-              +{formatarNumero(click)}
-            </motion.div>
-          ))}
-
-
-
-          <div className="save-actions">
-            <button className="btn-export" onClick={exportarSave}>Exportar</button>
-            <button className="btn-import" onClick={importarSave}>Importar</button>
-            <button className="btn-reset" onClick={() => {
-              localStorage.removeItem("QuickSave");
-              window.location.reload();
-            }}>Resetar</button>
           </div>
 
-            <p>Versao: {VERSAO_ATUAL}</p>
-        </div>
-      
-      )}
+          {/* DADO*/}
 
-      {telaAtual === "jogo" && (
 
-        <div class="lado-direito">
+          <div class="secao-dado">
 
-          <div className="secao-upgrade">
-            <h2>Upgrades</h2>
-            {upgradeDisponiveis.map((u, i) => (
-              <button
-                key={i}
-                className="botao-upgrade"
-                onClick={() => comprarUpgrade(u.indiceOriginal)}
-                disabled={contagem < u.preco}
+            <h1>Buxas Clicker</h1>
+            <h2>Total de numeros: {formatarNumero(contagem)}</h2>
+            <h2>Total REAL DE DAOS: {formatarNumero(contagemTotal)}</h2>
+
+            <h2>Total click dps {clickPorDps(upgrade, ascensao)}</h2>
+
+            <h3>DPS: {DPS.toFixed(1)}</h3>
+            <motion.img
+              id="dadoP"
+              src={dado}
+              onClick={Clicar}
+              animate={controls}
+              WhileHover={{
+                scale: 1.1,
+                filter: "brightness(1.1)",
+                transition: { duration: 0.3, repeat: Infinity, repeatType: "reverse" },
+              }}
+
+              style={{ width: "300px", cursor: "pointer", borderRadius: "0%", userSelect: "none", }}
+            />
+
+            {numeirinhos.map((text) => (
+              <motion.div
+                key={text.id}
+                initial={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 0, y: -50 }}
+                transition={{ duration: 1, ease: "easeOut" }}
                 style={{
-                  opacity: contagem < u.preco ? 0.4 : 1,
-                  cursor: contagem < u.preco ? "not-allowed" : "pointer",
+                  position: "absolute",
+                  left: text.x,
+                  top: text.y,
+                  transform: "translate(-50%, -50%)",
+                  color: "#fff",
+                  fontSize: "20px",
+                  fontWeight: "bold",
+                  textShadow: "0 0 5px black",
+                  pointerEvents: "none",
                 }}
               >
-                <img src={u.icone} alt={u.nome} />
-                <div className="info-texto">
-                  <span className="nome-item">{u.nome}</span>
-                  <span className="preco-item">Preço: {u.preco}</span>
-                  <span className="qtd-item">Qtd: {u.quantidade}</span>
-                </div>
-
-                {/* Caixa flutuante (popup) do Upgrade */}
-                <div className="popup-info">
-                  <strong>{u.nome}</strong>
-                  <p> Preço:{formatarNumero(u.preco)}</p> <br />
-                  <p>{u.descricao || "Um artefato antigo imbuído de poder profano."}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <div class="secao-construcao">
-            <h2>Construções</h2>
-            {construcoes.map((c, i) => (
-              <button key={i} className="botao-construcao" onClick={() => comprarConstrucao(i)}>
-                <img src={c.icone} alt={c.nome} /> <br />
-                {c.nome} <br />
-                preço: {formatarNumero(getPrecoAtual(c.preco, c.quantidade))} <br />
-                Quantidade: {c.quantidade} <br />
-                {/* Caixa flutuante (popup) com informações extras */}
-                <div className="popup-info">
-                  <strong>{c.nome}</strong>
-                  <p>{c.descricao || "Um artefato antigo imbuído de poder profano."}</p> <br />
-                  <p>{c.assin || "- O Narrador"}</p>
-                </div>
-              </button>
+                +{formatarNumero(click)}
+              </motion.div>
             ))}
 
+
+
+            <div className="save-actions">
+              <button className="btn-export" onClick={exportarSave}>Exportar</button>
+              <button className="btn-import" onClick={importarSave}>Importar</button>
+              <button className="btn-reset" onClick={() => {
+                localStorage.removeItem("QuickSave");
+                window.location.reload();
+              }}>Resetar</button>
+            </div>
+
+            <p>Versao: {VERSAO_ATUAL}</p>
           </div>
+
+
+          {/*LADO DIREITO*/}
+          {telaAtual === "jogo" && (
+
+            <div class="lado-direito">
+
+              <div className="secao-upgrade">
+                <h2>Upgrades</h2>
+                {upgradeDisponiveis.map((u, i) => (
+                  <button
+                    key={i}
+                    className="botao-upgrade"
+                    onClick={() => comprarUpgrade(u.indiceOriginal)}
+                    disabled={contagem < u.preco}
+                    style={{
+                      opacity: contagem < u.preco ? 0.4 : 1,
+                      cursor: contagem < u.preco ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <img src={u.icone} alt={u.nome} />
+                    <div className="info-texto">
+                      <span className="nome-item">{u.nome}</span>
+                      <span className="preco-item">Preço: {u.preco}</span>
+                      <span className="qtd-item">Qtd: {u.quantidade}</span>
+                    </div>
+
+                    {/* Caixa flutuante (popup) do Upgrade */}
+                    <div className="popup-info">
+                      <strong>{u.nome}</strong>
+                      <p> Preço:{formatarNumero(u.preco)}</p> <br />
+                      <p>{u.descricao || "Um artefato antigo imbuído de poder profano."}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div class="secao-construcao">
+                <h2>Construções</h2>
+                {construcoes.map((c, i) => (
+                  <button key={i} className="botao-construcao" onClick={() => comprarConstrucao(i)}>
+                    <img src={c.icone} alt={c.nome} /> <br />
+                    {c.nome} <br />
+                    preço: {formatarNumero(getPrecoAtual(c.preco, c.quantidade))} <br />
+                    Quantidade: {c.quantidade} <br />
+                    {/* Caixa flutuante (popup) com informações extras */}
+                    <div className="popup-info">
+                      <strong>{c.nome}</strong>
+                      <p>{c.descricao || "Um artefato antigo imbuído de poder profano."}</p> <br />
+                      <p>{c.assin || "- O Narrador"}</p>
+                    </div>
+                  </button>
+                ))}
+
+              </div>
+
+            </div>
+          )}
 
         </div>
       )}
 
+      {telaAtual === "pilares" && (
+        <div className="overlay-ascensao-tela-cheia">
+  <div className="janela-ascensao-tela-cheia">
+    
+    {/* Cabeçalho do Topo */}
+    <div className="cabecalho-ascensao-topo ultra-compacto">
+      <h2 className="titulo-ascensao-compacto">Pilares da Criação</h2>
+      <div className="painel-prestigio-ultra-compacto">
+        <span>Prestígio Atual</span>
+        <strong>{ascensao.prestigio}</strong>
       </div>
+    </div>
+
+    {/* --- CONTAINER DO CICLO CIRCULAR REORGANIZADO --- */}
+    <div className="ciclo-distritos-wrapper">
+      
+      {/* Distrito Base */}
+      {!ascensao.distritoBase.aberto && (
+        <div className="distrito-box item-ciclo posicao-3">
+          <img src={ordem} alt="Distrito Base" className="imagem-distrito-circular" />
+          <span className="legenda-distrito-oculta">Distrito Base</span>
+        </div>
       )}
 
+      {/* Distrito Ascensão */}
+      {!ascensao.distritoAscensao.aberto && (
+        <div className="distrito-box item-ciclo posicao-4">
+          <img src={ordem} alt="Distrito Ascensão" className="imagem-distrito-circular" />
+          <span className="legenda-distrito-oculta">Distrito Ascensão</span>
+        </div>
+      )}
+
+      {/* Distrito Ordem */}
+      {!ascensao.distritoOrdem.aberto && (
+        <div className="distrito-box item-ciclo posicao-5">
+          <img src={ordem} alt="Distrito Ordem" className="imagem-distrito-circular" />
+          <span className="legenda-distrito-oculta">Distrito Ordem</span>
+        </div>
+      )}
+
+      {/* Distrito Relíquias */}
+      {!ascensao.distritoReliquias.aberto && (
+        <div className="distrito-box item-ciclo posicao-1">
+          <img src={ordem} alt="Distrito Relíquias" className="imagem-distrito-circular" />
+          <span className="legenda-distrito-oculta">Distrito Relíquias</span>
+        </div>
+      )}
+
+      {/* Distrito Rayboom */}
+      {!ascensao.distritoRayboom.aberto && (
+        <div className="distrito-box item-ciclo posicao-2">
+          <img src={ray} alt="Distrito Rayboom" className="imagem-distrito-circular" />
+          <span className="legenda-distrito-oculta">Distrito Rayboom</span>
+        </div>
+      )}
+
+    </div>
+
+    {/* NOVO: Botão Transcender posicionado aqui */}
+    <button className="botao-transcender" onClick={() => setTelaAtual("jogo")}>
+      Transcender
+    </button>
+
+    {/* Painel Fixo Inferior de Upgrades */}
+    <div className="painel-detalhes-distrito">
+      <h3>Título do Distrito</h3>
+      <p className="texto-detalhes-sub">Sua descrição customizada aqui.</p>
+      
+      <div className="item-upgrade-linha">
+        <div className="info-upgrade-texto">
+          <h4>Nome do Upgrade</h4>
+          <p>Efeito ou bônus que o jogador vai receber ao clicar.</p>
+        </div>
+        <button className="botao-comprar-up-distrito">Preço: 1 🌟</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+      )}
 
     </div>
   );

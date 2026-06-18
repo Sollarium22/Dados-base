@@ -764,3 +764,222 @@ body {
   opacity: 1;
   transform: translateX(-50%) translateY(0); /* Sobe suavemente para a posição final */
 }
+
+/****************************************************TELA FULL ASCENSAO***********************************/
+/* Remove qualquer espaço nas bordas e cobre 100% do monitor */
+.overlay-ascensao-tela-cheia {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #05020a; /* Fundo preto puro de segurança */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+}
+
+/* Janela ocupando absolutamente todo o espaço disponível */
+.janela-ascensao-tela-cheia {
+  background: linear-gradient(rgba(5, 2, 10, 0.4), rgba(20, 7, 39, 0.75)), 
+              url('./gala.png') no-repeat center center;
+  background-size: cover;
+  
+  /* Borda colada nos cantos da tela */
+  border: 1.5px solid #9d4edd; 
+  width: 100vw;
+  height: 100vh;
+  
+  padding: 30px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  box-shadow: inset 0 0 60px rgba(5, 2, 10, 0.95);
+  color: #e0aaff;
+}
+
+.cabecalho-ascensao-topo.ultra-compacto {
+  margin-top: 10px; /* Dá um espaço sutil do topo do monitor */
+  margin-bottom: 25px; /* Afasta o cabeçalho das esferas */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Garante que o painel volte a aparecer com uma estrutura bonita e visível */
+.painel-prestigio-ultra-compacto {
+  background: rgba(10, 5, 22, 0.75);
+  border: 1px solid rgba(255, 51, 68, 0.5); /* Borda néon vermelha de volta */
+  border-radius: 6px;
+  width: 100%;
+  max-width: 320px; 
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 0 15px rgba(255, 51, 68, 0.15);
+}
+
+.painel-prestigio-ultra-compacto span {
+  font-size: 12px;
+  color: #c77dff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.painel-prestigio-ultra-compacto strong {
+  font-size: 18px;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+
+.botao-transcender {
+  background: radial-gradient(circle, #3a0e5c 0%, #1a052e 100%);
+  border: 2px solid #ff3344; /* Borda néon vermelha/rosa para destacar */
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(255, 51, 68, 0.3), inset 0 0 10px rgba(157, 78, 221, 0.4);
+  
+  /* Transições suaves para interações e animação contínua */
+  transition: all 0.3s ease;
+  animation: pulsoCosmico 2s infinite ease-in-out;
+}
+
+/* Efeito ao passar o mouse por cima (Hover) */
+.botao-transcender:hover {
+  background: radial-gradient(circle, #521380 0%, #250742 100%);
+  border-color: #00f5d4; /* Muda para verde-néon ao focar */
+  box-shadow: 0 0 25px rgba(0, 245, 212, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 8px #ffffff;
+  transform: scale(1.05); /* Aumenta levemente de tamanho */
+}
+
+/* Efeito ao clicar (Active) */
+.botao-transcender:active {
+  transform: scale(0.98);
+}
+
+/* Animação que faz o brilho da borda pulsar suavemente no vácuo do espaço */
+@keyframes pulsoCosmico {
+  0% {
+    box-shadow: 0 0 15px rgba(255, 51, 68, 0.3), inset 0 0 10px rgba(157, 78, 221, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(255, 51, 68, 0.6), inset 0 0 15px rgba(157, 78, 221, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(255, 51, 68, 0.3), inset 0 0 10px rgba(157, 78, 221, 0.4);
+  }
+}
+
+
+
+
+
+
+
+.ciclo-distritos-wrapper {
+  position: relative;
+  width: 400px;  /* Tamanho da área da roda de distritos */
+  height: 400px; /* Deve ser quadrado para o círculo ficar perfeito */
+  margin: 10px 0;
+  flex-shrink: 0;
+}
+
+/* Base para cada caixa individual de distrito dentro do ciclo */
+.distrito-box.item-ciclo {
+  position: absolute;
+  width: 140px;  /* Ajustado o tamanho para caberem os 5 sem colidir */
+  height: 145px;
+  background: rgba(15, 8, 28, 0.5);
+  border: 1px solid rgba(157, 78, 221, 0.4);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-sizing: border-box;
+  
+  /* Centraliza a ancoragem de posicionamento no meio da própria caixa */
+  transform: translate(-50%, -50%); 
+}
+
+.distrito-box.item-ciclo:hover {
+  border-color: #ff3344;
+  background: rgba(35, 12, 50, 0.65);
+  box-shadow: 0 0 25px rgba(255, 51, 68, 0.35);
+  transform: translate(-50%, -50%) scale(1.05); /* Mantém o translate e aplica o zoom */
+}
+
+/* ================= POSICIONAMENTO COORDENADO (CONFORME A IMAGEM) ================= */
+
+/* Posição 1: Base Inferior Esquerda */
+.posicao-1 {
+  top: 78%;
+  left: 28%;
+}
+
+/* Posição 2: Meio Esquerda Médio */
+.posicao-2 {
+  top: 45%;
+  left: 10%;
+}
+
+/* Posição 3: Topo Superior Centro */
+.posicao-3 {
+  top: 15%;
+  left: 50%;
+}
+
+/* Posição 4: Meio Direita Médio */
+.posicao-4 {
+  top: 45%;
+  left: 90%;
+}
+
+/* Posição 5: Base Inferior Direita */
+.posicao-5 {
+  top: 78%;
+  left: 72%;
+}
+
+/* ================================================================================= */
+
+/* Imagens circulares internas */
+.imagem-distrito-circular {
+  width: 95px;  
+  height: 95px; 
+  border-radius: 100%; 
+  object-fit: cover;   
+  border: 2px solid rgba(157, 78, 221, 0.6);
+  filter: drop-shadow(0 0 10px rgba(157, 78, 221, 0.5));
+  transition: all 0.25s ease;
+}
+
+.distrito-box.item-ciclo:hover .imagem-distrito-circular {
+  border-color: #ff3344;
+  filter: drop-shadow(0 0 15px rgba(255, 51, 68, 0.75));
+}
+
+.legenda-distrito-oculta {
+  font-size: 10px;
+  color: #c77dff;
+  margin-top: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  white-space: nowrap;
+}
