@@ -2,7 +2,7 @@
 
 // VERSIONAMENTO DE SAVE
 
-export const VERSAO_ATUAL = 1.2;
+export const VERSAO_ATUAL = 1.3;
 
 export const DEFAULT_SAVE = {
     version: VERSAO_ATUAL,
@@ -20,7 +20,38 @@ export const DEFAULT_SAVE = {
         { id: "dados2", comprado: false }
     ],
     vinho: { desbloqueado: false, level: 1, creditos: 0, mercado: 1 },
-    ascensao: {desbloqueado: false, prestigio: 0, prestigioTotal: 0,}, 
+
+    ascensao: {
+        desbloqueado: false,
+        prestigio: 0,
+        prestigioTotal: 0,
+
+        distritoBase: {
+            aberto: false,
+            upgrades: [
+                { nome: "Começo", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio" }
+            ]
+        },
+
+        distritoAscensao: {
+            aberto: false,
+            upgrades: [
+                { nome: "Tempo", preco: 1, efeito: "duplicarClick", id: "ascensao1", comprado: false, descricao: "Você duplica seu Click" }
+            ]
+        },
+        distritoOrdem: {
+            aberto: false,
+            upgrades: [
+                { nome: "Novato Transcendido", preco: 1, efeito: "novatoGratis", id: "ordem1", comprado: false, descricao: "Você Ganha 10 novatos gratis" }
+            ]
+        },
+        distritoReliquias: {
+            aberto: false,
+        },
+        distritoRayboom: {
+            aberto: false,
+        }
+    },
 };
 
 const migracoes = {
@@ -28,12 +59,12 @@ const migracoes = {
     // 1: (save) => { return { ...save, version: 2, novaPropriedade: 0 } }
     0: (saveAntigo) => {
         console.log("Migrando save da versao 0 para versao 1");
-        
+
         return {
-             ...saveAntigo,
-             version: 1,
-             //construcoes: construcoesAtualizadas
-         }
+            ...saveAntigo,
+            version: 1,
+            //construcoes: construcoesAtualizadas
+        }
     },
 
     1: (saveAntigo) => {
@@ -43,12 +74,12 @@ const migracoes = {
         //     ...saveAntigo.construcoes,
         //     { nome: "Lo testador", quantidade: 0 }
         // ]
-          return {
-             ...saveAntigo,
-             version: 1.1,
-             //construcoes: construcoesAtualizadas
-         }
-    
+        return {
+            ...saveAntigo,
+            version: 1.1,
+            //construcoes: construcoesAtualizadas
+        }
+
 
     },
     1.1: (saveAntigo) => {
@@ -56,10 +87,50 @@ const migracoes = {
         return {
             ...saveAntigo,
             version: 1.2,
-            ascensao: {desbloqueado: false, prestigio: 0, prestigioTotal: 0},
+            ascensao: { desbloqueado: false, prestigio: 0, prestigioTotal: 0 },
             contagemTotal: 0,
         }
     },
+    1.2: (saveAntigo) => {
+        console.log("Migrando sabe da versao 1.2 para versao 1.3")
+
+        const ascensaoAtt1 = {
+            ...saveAntigo.ascensao,  //
+         //se for garantir que existe: prestigioTotal: saveAntigo.ascensao?.prestigioTotal ?? 0,
+
+            distritoBase: {
+                aberto: false,
+                upgrades: [
+                    { nome: "Começo", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio" }
+                ]
+            },
+
+            distritoAscensao: {
+                aberto: false,
+                upgrades: [
+                    { nome: "Tempo", preco: 1, efeito: "duplicarClick", id: "ascensao1", comprado: false, descricao: "Você duplica seu Click" }
+                ]
+            },
+            distritoOrdem: {
+                aberto: false,
+                upgrades: [
+                    { nome: "Novato Transcendido", preco: 1, efeito: "novatoGratis", id: "ordem1", comprado: false, descricao: "Você Ganha 10 novatos gratis" }
+                ]
+            },
+            distritoReliquias: {
+                aberto: false,
+            },
+            distritoRayboom: {
+                aberto: false,
+            }
+
+        }
+        return {
+            ...saveAntigo,
+            versao:1.3,
+            ascensao: ascensaoAtt1
+        }
+    }
 
 };
 
@@ -90,18 +161,18 @@ function normalizeUpgrades(saved = [], defaults) {
 // Junta a lógica de ler o objeto bruto, rodar migrações e normalizar propriedades
 export function processarSave(saveCarregado, defaultsConstrucoes, defaultsUpgrades) {
     let currentVersion = saveCarregado.version ?? 0;
-     let iterations = 0;
+    let iterations = 0;
 
     // 1. Roda a esteira de migrações passo a passo
     while (currentVersion < VERSAO_ATUAL && iterations < 50) {
         iterations++;
-        
+
         const migration = migracoes[currentVersion];
         if (!migration) {
             saveCarregado.version = VERSAO_ATUAL;
             break;
         }
-        
+
         saveCarregado = migration(saveCarregado);
         currentVersion = saveCarregado.version;
     }
@@ -120,6 +191,6 @@ export function processarSave(saveCarregado, defaultsConstrucoes, defaultsUpgrad
         vinho: { ...DEFAULT_SAVE.vinho, ...saveCarregado.vinho },
         construcoes: normalizeConstrucoes(saveCarregado.construcoes, defaultsConstrucoes),
         upgrade: normalizeUpgrades(saveCarregado.upgrade, defaultsUpgrades),
-        ascensao: {...DEFAULT_SAVE.ascensao, ...saveCarregado.ascensao}
+        ascensao: { ...DEFAULT_SAVE.ascensao, ...saveCarregado.ascensao }
     };
 }
