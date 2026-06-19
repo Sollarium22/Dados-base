@@ -67,7 +67,9 @@ function App() {
     { nome: "Mochila de Equipamentos", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados1", icone: dodo },
     { nome: "Espada Nova", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados2", icone: dodo },
 
-    { nome: "Mega espada", preco: "10", efeito: "clickDps", comprado: false, id: "clickDps1", icone: dodo, descricao: "Sua espada propria agora da 1% de seu DPS" }
+    { nome: "Mega espada", preco: "10", efeito: "clickDps", comprado: false, id: "clickDps1", icone: dodo, descricao: "Sua espada propria agora da 1% de seu DPS" },
+
+    { nome: "Cores", preco: "10", efeito:"10porcento", comprado: false, id:"contagemRay1", icone:ray, descricao:"Quem sabe q merda pode rolar aqui"},
   ]
 
   const DEFAULT_VINHO = { desbloqueado: false, level: 1, creditos: 0, mercado: 1 }
@@ -152,10 +154,16 @@ function App() {
     },
     distritoReliquias: {
       aberto: false,
+      upgrades: [
+        { nome: "Relogio de bolso", preco:1, efeito: "1porcento", id: "reliquia1", comprado: false, descricao: "Algo de sua propria alma, seu reflexo, aumenta 1% do cps base"}
+      ]
     },
     distritoRayboom: {
       aberto: false,
-    }
+      upgrades: [
+        { nome: "Flor Magica", preco: 1, efeito: "caixaRayboom", id:"rayboom1", comprado:true, descricao: "Uma pequena flor que lhe da poderes...interessante"}
+        ]
+    },
   }
 
   const [ascensao, setAscensao] = useState(DEFAULT_ASCENSAO)
@@ -401,12 +409,21 @@ function App() {
         const quantidadeTotal = c.quantidade + (c.quantidadeGratis || 0)
         return soma + dpsConstrucao(c) * quantidadeTotal;
         }, 0);
+
+        //Multiplicadores de por cento
+      const multiplicador1Porcento = upgrade.filter(u => u.efeito === "1porcento" && u.comprado).length;
+      const multiplicador2Porcento = upgrade.filter(u => u.efeito === "2porcento" && u.comprado).length;
+      const multiplicador5Porcento = upgrade.filter(u => u.efeito === "5porcento" && u.comprado).length;
+      const multiplicador10Porcento = upgrade.filter(u => u.efeito === "10porcento" && u.comprado).length;
+
+      const multiplicadorBasico = 1 + multiplicador1Porcento * 0.01 + multiplicador2Porcento * 0.02 + multiplicador5Porcento * 0.05 + multiplicador10Porcento * 0.10;
+
       
       const dspAscensaoAtivo = ascensao.distritoBase.upgrades.filter(u => u.efeito === "ascensaodps" && u.comprado);
         // O ? é a simplificacao do if Else, IF - ?, Else - :
       const multiplicadorPrestigio = dspAscensaoAtivo ? 1 + ascensao.prestigioTotal * 0.01 : 1
 
-      const producao = producaoBase * multiplicadorPrestigio;
+      const producao = producaoBase * multiplicadorBasico * multiplicadorPrestigio ;
 
       setDps(producao);
       setContagem((atual) => atual + producao / 10);
@@ -668,9 +685,16 @@ function App() {
     .filter(u => {
       if (u.comprado) return false;
 
-      if (u.id === "click1" && contagem < 10) return false;
+      if (u.id === "click1" && contagemTotal < 10) return false;
       if (u.id === "dados1" && contagemDado < 1) return false;
       if (u.id === "dados2" && contagemDado < 10) return false;
+
+    const caixaRayboomAtivo = ascensao.distritoRayboom.upgrades.some(up => up.id === "rayboom1" && up.comprado);
+
+
+    // Se o upgrade atual for o "Cores" (contagemRay1) e a flor estiver comprada, ele some da lista
+      if (u.id === "contagemRay1" && caixaRayboomAtivo<1) return false;
+
 
       return true;
     });
