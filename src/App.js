@@ -21,6 +21,50 @@ import ray from './Ray.png';
 
 
 function App() {
+
+  // ... dentro do seu componente:
+  const mapaRef = useRef(null);
+  const [estaArrastando, setEstaArrastando] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
+
+  // Força a centralização milimétrica perfeita assim que a tela abre
+  useEffect(() => {
+    if (mapaRef.current) {
+      // 1000px é o centro do mapa de 2000px. Subtraímos metade da tela do jogador para focar no meio.
+      mapaRef.current.scrollLeft = 1000 - (window.innerWidth / 2);
+      mapaRef.current.scrollTop = 1100 - (window.innerHeight / 2);
+    }
+  }, []);
+
+  const iniciarArrasto = (e) => {
+    setEstaArrastando(true);
+    setStartX(e.pageX - mapaRef.current.offsetLeft);
+    setStartY(e.pageY - mapaRef.current.offsetTop);
+    setScrollLeft(mapaRef.current.scrollLeft);
+    setScrollTop(mapaRef.current.scrollTop);
+  };
+
+  const pararArrasto = () => {
+    setEstaArrastando(false);
+  };
+
+  const arrastando = (e) => {
+    if (!estaArrastando) return;
+    e.preventDefault();
+
+    const x = e.pageX - mapaRef.current.offsetLeft;
+    const walkX = (x - startX) * 1.5; // Altere 1.5 para aumentar/diminuir a velocidade do arrasto
+
+    const y = e.pageY - mapaRef.current.offsetTop;
+    const walkY = (y - startY) * 1.5;
+
+    mapaRef.current.scrollLeft = scrollLeft - walkX;
+    mapaRef.current.scrollTop = scrollTop - walkY;
+  };
+
   const b_novato = 0.5;
   const b_guerreiro = 1;
   const b_mago = 100_000;
@@ -69,7 +113,7 @@ function App() {
 
     { nome: "Mega espada", preco: "10", efeito: "clickDps", comprado: false, id: "clickDps1", icone: dodo, descricao: "Sua espada propria agora da 1% de seu DPS" },
 
-    { nome: "Cores", preco: "10", efeito:"10porcento", comprado: false, id:"contagemRay1", icone:ray, descricao:"Quem sabe q merda pode rolar aqui"},
+    { nome: "Cores", preco: "10", efeito: "10porcento", comprado: false, id: "contagemRay1", icone: ray, descricao: "Quem sabe q merda pode rolar aqui" },
   ]
 
   const DEFAULT_VINHO = { desbloqueado: false, level: 1, creditos: 0, mercado: 1 }
@@ -129,40 +173,141 @@ function App() {
   // ------------------------------------ASCENCAO--------------------------------------
 
   const DEFAULT_ASCENSAO = {
-    desbloqueado: false,
+    desbloqueado: true,
     prestigio: 0,
     prestigioTotal: 0,
 
     distritoBase: {
+      icone: ordem,
       aberto: false,
       upgrades: [
-        { nome: "Começo", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio" }
+        { nome: "Comeaço", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: true, descricao: "Você ganha 1% de dps por nivel de prestigio", icone: "🌟", preRequisito: null, x: 0, y: -140, angulo: -90 }, // Fica 140px acima do centro do distrito 
+        {
+          id: "upgradeSim",
+          nome: "Sim (Bifurcação 1)",
+          preco: 1,
+          comprado: false,
+          descricao: "É um teste do lado esquerdo",
+          icone: "✨",
+          preRequisito: "ascensaodps", // Só aparece se o "Começo" for comprado!
+          x: -60, y: -220, // Move para cima e um pouco para a esquerda
+          angulo: -135
+        },
+        {
+          id: "upgradeNao",
+          nome: "Não (Bifurcação 2)",
+          preco: 1,
+          comprado: false,
+          descricao: "É um teste do lado direito",
+          icone: "🔥",
+          preRequisito: "ascensaodps", // Também depende do "Começo"! Cria a divisão em 2.
+          x: 60, y: -220, // Move para cima e um pouco para a direita
+          angulo: -45
+        },
+
       ]
     },
 
+    // 2. DISTRITO ASCENSÃO (Cresce para a Direita)
     distritoAscensao: {
+      icone: ordem,
       aberto: false,
       upgrades: [
-        { nome: "Tempo", preco: 1, efeito: "duplicarClick", id: "ascensao1", comprado: false, descricao: "Você duplica seu Click" }
+        {
+          id: "ascensao1",
+          nome: "Tempo",
+          preco: 1,
+          efeito: "duplicarClick",
+          comprado: true,
+          descricao: "Você duplica seu Click",
+          icone: "⏳",
+          preRequisito: null,
+          x: 110, y: -80,    // Move para cima e para a direita
+          angulo: -40
+        },
+        {
+          id: "ascensaoBifurcada1",
+          nome: "Novo Upgrade Foda",
+          preco: 2,
+          comprado: false,
+          descricao: "Bifurcação de teste",
+          icone: "⚡",
+          preRequisito: "ascensao1", // Trava a dependência no ID do upgrade "Tempo"
+          x: 190, y: -140,          // Afasta o X e o Y um pouco mais do centro
+          angulo: -40
+        },
+        {
+          id: "ascensaoBifurcada2",
+          nome: "Novo Upgrade Foda",
+          preco: 2,
+          comprado: false,
+          descricao: "Bifurcação de teste",
+          icone: "⚡",
+          preRequisito: "ascensao1", // Trava a dependência no ID do upgrade "Tempo"
+          x: 190, y: -80,          // Afasta o X e o Y um pouco mais do centro
+          angulo: 7
+        }
       ]
     },
+
+    // 3. DISTRITO ORDEM (Cresce para Baixo/Direita)
     distritoOrdem: {
+      icone: ordem,
       aberto: false,
       upgrades: [
-        { nome: "Novato Transcendido", preco: 1, efeito: "novatoGratis", id: "ordem1", comprado: false, descricao: "Você Ganha 10 novatos gratis" }
+        {
+          id: "ordem1",
+          nome: "Novato Transcendido",
+          preco: 1,
+          efeito: "novatoGratis",
+          comprado: false,
+          descricao: "Você Ganha 10 novatos gratis",
+          icone: "👥",
+          preRequisito: null,
+          x: 90, y: 100,      // Move para baixo e para a direita
+          angulo: 45
+        }
       ]
     },
+
+    // 4. DISTRITO RELÍQUIAS (Cresce para Baixo/Esquerda)
     distritoReliquias: {
+      icone: ordem,
       aberto: false,
       upgrades: [
-        { nome: "Relogio de bolso", preco:1, efeito: "1porcento", id: "reliquia1", comprado: false, descricao: "Algo de sua propria alma, seu reflexo, aumenta 1% do cps base"}
+        {
+          id: "reliquia1",
+          nome: "Relogio de bolso",
+          preco: 1,
+          efeito: "1porcento",
+          comprado: false,
+          descricao: "Algo de sua propria alma, seu reflexo, aumenta 1% do cps base",
+          icone: "🔮",
+          preRequisito: null,
+          x: -90, y: 100,     // Move para baixo e para a esquerda
+          angulo: 135
+        }
       ]
     },
+
+    // 5. DISTRITO RAYBOOM (Cresce para a Esquerda)
     distritoRayboom: {
+      icone: ray,
       aberto: false,
       upgrades: [
-        { nome: "Flor Magica", preco: 1, efeito: "caixaRayboom", id:"rayboom1", comprado:true, descricao: "Uma pequena flor que lhe da poderes...interessante"}
-        ]
+        {
+          id: "rayboom1",
+          nome: "Flor Magica",
+          preco: 1,
+          efeito: "caixaRayboom",
+          comprado: false,
+          descricao: "Uma pequena flor que lhe da poderes...interessante",
+          icone: "🌸",
+          preRequisito: null,
+          x: -110, y: -80,   // Move para cima e para a esquerda
+          angulo: -140
+        }
+      ]
     },
   }
 
@@ -335,7 +480,7 @@ function App() {
     return total;
   }
 
-  
+
 
 
   //USEFECT DE UPGRADES
@@ -375,29 +520,29 @@ function App() {
 
 
   //UPGRADES ASCENSAO:
-  useEffect(()=> {
+  useEffect(() => {
     const novatoGratis = ascensao.distritoOrdem.upgrades.filter(u => u.efeito === "novatoGratis" && u.comprado).length;
-    
-    setConstrucoes(anterior => 
-      anterior.map(c => 
+
+    setConstrucoes(anterior =>
+      anterior.map(c =>
         c.nome === "Novato"
           ? {
             ...c,
             quantidadeGratis: novatoGratis * 10
           }
-          :c
+          : c
       )
     );
 
-    
-    
+
+
 
 
 
   }, [ascensao])
 
   //DPS DA CONSTRUCAO
-  function dpsConstrucao(c){
+  function dpsConstrucao(c) {
     return c.dps;
   }
 
@@ -405,12 +550,12 @@ function App() {
   useEffect(() => {
     const timer = setInterval(() => {
 
-      const producaoBase = construcoes.reduce((soma, c) =>{
+      const producaoBase = construcoes.reduce((soma, c) => {
         const quantidadeTotal = c.quantidade + (c.quantidadeGratis || 0)
         return soma + dpsConstrucao(c) * quantidadeTotal;
-        }, 0);
+      }, 0);
 
-        //Multiplicadores de por cento
+      //Multiplicadores de por cento
       const multiplicador1Porcento = upgrade.filter(u => u.efeito === "1porcento" && u.comprado).length;
       const multiplicador2Porcento = upgrade.filter(u => u.efeito === "2porcento" && u.comprado).length;
       const multiplicador5Porcento = upgrade.filter(u => u.efeito === "5porcento" && u.comprado).length;
@@ -418,12 +563,12 @@ function App() {
 
       const multiplicadorBasico = 1 + multiplicador1Porcento * 0.01 + multiplicador2Porcento * 0.02 + multiplicador5Porcento * 0.05 + multiplicador10Porcento * 0.10;
 
-      
+
       const dspAscensaoAtivo = ascensao.distritoBase.upgrades.filter(u => u.efeito === "ascensaodps" && u.comprado);
-        // O ? é a simplificacao do if Else, IF - ?, Else - :
+      // O ? é a simplificacao do if Else, IF - ?, Else - :
       const multiplicadorPrestigio = dspAscensaoAtivo ? 1 + ascensao.prestigioTotal * 0.01 : 1
 
-      const producao = producaoBase * multiplicadorBasico * multiplicadorPrestigio ;
+      const producao = producaoBase * multiplicadorBasico * multiplicadorPrestigio;
 
       setDps(producao);
       setContagem((atual) => atual + producao / 10);
@@ -659,7 +804,8 @@ function App() {
       const upgradeAs = prev[distrito]?.upgrades[index];
       if (!upgradeAs) return prev;
 
-      const prestigioAtual = Number[preco.prestigio] || 0;
+      // CORRIGIDO: Puxa o prestígio atual direto do estado do jogo (prev)
+      const prestigioAtual = Number(prev.prestigio) || 0;
       const preco = Number(upgradeAs.preco) || 0;
 
       if (upgradeAs.comprado || prestigioAtual < preco) return prev;
@@ -673,8 +819,8 @@ function App() {
             i === index ? { ...u, comprado: true } : u
           )
         }
-      }
-    })
+      };
+    });
   }
 
   //================================== BASE DE UPGRADES ==================
@@ -689,11 +835,11 @@ function App() {
       if (u.id === "dados1" && contagemDado < 1) return false;
       if (u.id === "dados2" && contagemDado < 10) return false;
 
-    const caixaRayboomAtivo = ascensao.distritoRayboom.upgrades.some(up => up.id === "rayboom1" && up.comprado);
+      const caixaRayboomAtivo = ascensao.distritoRayboom.upgrades.some(up => up.id === "rayboom1" && up.comprado);
 
 
-    // Se o upgrade atual for o "Cores" (contagemRay1) e a flor estiver comprada, ele some da lista
-      if (u.id === "contagemRay1" && caixaRayboomAtivo<1) return false;
+      // Se o upgrade atual for o "Cores" (contagemRay1) e a flor estiver comprada, ele some da lista
+      if (u.id === "contagemRay1" && caixaRayboomAtivo < 1) return false;
 
 
       return true;
@@ -958,83 +1104,129 @@ function App() {
 
       {telaAtual === "pilares" && (
         <div className="overlay-ascensao-tela-cheia">
-  <div className="janela-ascensao-tela-cheia">
-    
-    {/* Cabeçalho do Topo */}
-    <div className="cabecalho-ascensao-topo ultra-compacto">
-      <h2 className="titulo-ascensao-compacto">Pilares da Criação</h2>
-      <div className="painel-prestigio-ultra-compacto">
-        <span>Prestígio Atual</span>
-        <strong>{ascensao.prestigio}</strong>
-      </div>
-    </div>
+          <div className="janela-ascensao-tela-cheia">
 
-    {/* --- CONTAINER DO CICLO CIRCULAR REORGANIZADO --- */}
-    <div className="ciclo-distritos-wrapper">
-      
-      {/* Distrito Base */}
-      {!ascensao.distritoBase.aberto && (
-        <div className="distrito-box item-ciclo posicao-3">
-          <img src={ordem} alt="Distrito Base" className="imagem-distrito-circular" />
-          <span className="legenda-distrito-oculta">Distrito Base</span>
+            <div className="cabecalho-ascensao-topo fixado">
+              <h2 className="titulo-ascensao-compacto">Pilares da Criação</h2>
+              <div className="painel-prestigio-ultra-compacto">
+                <span>Prestígio Atual</span>
+                <strong>{ascensao.prestigio}</strong>
+              </div>
+            </div>
+
+            <div className={`espaco-arrastavel-container ${estaArrastando ? 'arrastando' : ''}`}
+              ref={mapaRef}
+              onMouseDown={iniciarArrasto}
+              onMouseLeave={pararArrasto}
+              onMouseUp={pararArrasto}
+              onMouseMove={arrastando}
+            >
+              <div className="mapa-conteudo-gigante">
+
+                {/* ======================================================== */}
+                {/* RENDERIZAÇÃO AUTOMÁTICA DA ÁRVORE CÓSMICA */}
+                {/* ======================================================== */}
+                {[
+                  { id: 'distritoBase', nome: 'Distrito Base', aberto: ascensao.distritoBase.aberto, upgrades: ascensao.distritoBase.upgrades, cx: 1000, cy: 450, direcaoUp: 'cima', icone: ascensao.distritoBase.icone },
+                  { id: 'distritoRayboom', nome: 'Distrito Rayboom', aberto: ascensao.distritoRayboom.aberto, upgrades: ascensao.distritoRayboom.upgrades, cx: 780, cy: 650, direcaoUp: 'esquerda', icone: ascensao.distritoRayboom.icone },
+                  { id: 'distritoAscensao', nome: 'Distrito Ascensão', aberto: ascensao.distritoAscensao.aberto, upgrades: ascensao.distritoAscensao.upgrades, cx: 1220, cy: 650, direcaoUp: 'direita', icone: ascensao.distritoAscensao.icone },
+                  { id: 'distritoReliquias', nome: 'Distrito Relíquias', aberto: ascensao.distritoReliquias.aberto, upgrades: ascensao.distritoReliquias.upgrades, cx: 880, cy: 870, direcaoUp: 'baixo-esquerda', icone: ascensao.distritoReliquias.icone },
+                  { id: 'distritoOrdem', nome: 'Distrito Ordem', aberto: ascensao.distritoOrdem.aberto, upgrades: ascensao.distritoOrdem.upgrades, cx: 1120, cy: 870, direcaoUp: 'baixo-direita', icone: ascensao.distritoOrdem.icone }
+                ].map((distrito) => {
+
+                  return (
+                    <div key={distrito.id}>
+
+                      {/* 1. RENDERIZA O CARD DO DISTRITO */}
+                      {!distrito.aberto && (
+                        <div
+                          className="distrito-box item-arvore-dinamico"
+                          style={{ top: `${distrito.cy}px`, left: `${distrito.cx}px` }}
+                        >
+                          <img src={distrito.icone} alt={distrito.nome} className="imagem-distrito-circular" />
+                          <span className="legenda-distrito-oculta">{distrito.nome}</span>
+                        </div>
+                      )}
+
+                      {/* 2. LOOP AUTOMÁTICO DE UPGRADES DO DISTRITO COM PRÉ-REQUISITO E BIFURCAÇÃO */}
+                      {!distrito.aberto && distrito.upgrades && distrito.upgrades.map((upgrade, index) => {
+
+                        // 1. CHECAGEM DE PRÉ-REQUISITO:
+                        if (upgrade.preRequisito) {
+                          const upgradePai = distrito.upgrades.find(up => up.id === upgrade.preRequisito);
+                          if (!upgradePai || !upgradePai.comprado) return null;
+                        }
+
+                        // O restante do seu código matemático de X, Y e o clique de compra continuam iguaizinhos...
+                        const upX = distrito.cx + upgrade.x;
+                        const upY = distrito.cy + upgrade.y;
+
+                        // 3. CÁLCULO AUTOMÁTICO DO TAMANHO DA LINHA:
+                        // Se for o primeiro item (sem pai), a linha conecta no distrito. 
+                        // Se for uma bifurcação, calcula a distância exata até o upgrade pai usando Pitágoras.
+                        let tamanhoLinha = 65; // Padrão para o primeiro nodo ligado ao distrito
+
+                        if (upgrade.preRequisito) {
+                          const upgradePai = distrito.upgrades.find(up => up.id === upgrade.preRequisito);
+                          if (upgradePai) {
+                            const dx = upgrade.x - upgradePai.x;
+                            const dy = upgrade.y - upgradePai.y;
+                            tamanhoLinha = Math.sqrt(dx * dx + dy * dy) - 20; // Deduz o raio da bolinha para não sobrepor
+                          }
+                        }
+
+                        return (
+                          <div
+                            key={upgrade.id}
+                            className={`upgrade-nodo-dinamico ${upgrade.comprado ? 'adquirido' : ''}`}
+                            style={{ top: `${upY}px`, left: `${upX}px` }}
+                          >
+                            {/* Linha pontilhada cósmica */}
+                            <div
+                              className="linha-pontilhada-conectar-dinamica"
+                              style={{
+                                width: `${tamanhoLinha}px`,
+                                transform: `rotate(${upgrade.angulo + 180}deg)`,
+                                top: '23px',
+                                left: '23px'
+                              }}
+                            />
+
+                            {/* ADICIONADO O ONCLICK AQUI: Compra o upgrade ao clicar na bolinha mística */}
+                            <div
+                              className="upgrade-icone-circulo"
+                              onClick={() => comprarUpgradeAscensao(distrito.id, index)}
+                            >
+                              {upgrade.icone || '✨'}
+                            </div>
+
+                            {/* Tooltip flutuante */}
+                            <span className="tooltip-up-cookies">
+                              <strong>{upgrade.nome}</strong>
+                              <p>{upgrade.descricao}</p>
+                              <small>Preço: {upgrade.preco} Prestígio</small>
+                            </span>
+                          </div>
+                        );
+                      })}
+
+                    </div>
+                  );
+                })}
+
+              </div>
+
+
+              <div className="controles-inferiores-fixos">
+                <button className="botao-transcender" onClick={() => setTelaAtual("jogo")}>
+                  Transcender
+                </button>
+
+              </div>
+            </div>
+
+          </div>
         </div>
-      )}
-
-      {/* Distrito Ascensão */}
-      {!ascensao.distritoAscensao.aberto && (
-        <div className="distrito-box item-ciclo posicao-4">
-          <img src={ordem} alt="Distrito Ascensão" className="imagem-distrito-circular" />
-          <span className="legenda-distrito-oculta">Distrito Ascensão</span>
-        </div>
-      )}
-
-      {/* Distrito Ordem */}
-      {!ascensao.distritoOrdem.aberto && (
-        <div className="distrito-box item-ciclo posicao-5">
-          <img src={ordem} alt="Distrito Ordem" className="imagem-distrito-circular" />
-          <span className="legenda-distrito-oculta">Distrito Ordem</span>
-        </div>
-      )}
-
-      {/* Distrito Relíquias */}
-      {!ascensao.distritoReliquias.aberto && (
-        <div className="distrito-box item-ciclo posicao-1">
-          <img src={ordem} alt="Distrito Relíquias" className="imagem-distrito-circular" />
-          <span className="legenda-distrito-oculta">Distrito Relíquias</span>
-        </div>
-      )}
-
-      {/* Distrito Rayboom */}
-      {!ascensao.distritoRayboom.aberto && (
-        <div className="distrito-box item-ciclo posicao-2">
-          <img src={ray} alt="Distrito Rayboom" className="imagem-distrito-circular" />
-          <span className="legenda-distrito-oculta">Distrito Rayboom</span>
-        </div>
-      )}
-
-    </div>
-
-    {/* NOVO: Botão Transcender posicionado aqui */}
-    <button className="botao-transcender" onClick={() => setTelaAtual("jogo")}>
-      Transcender
-    </button>
-
-    {/* Painel Fixo Inferior de Upgrades */}
-    <div className="painel-detalhes-distrito">
-      <h3>Título do Distrito</h3>
-      <p className="texto-detalhes-sub">Sua descrição customizada aqui.</p>
-      
-      <div className="item-upgrade-linha">
-        <div className="info-upgrade-texto">
-          <h4>Nome do Upgrade</h4>
-          <p>Efeito ou bônus que o jogador vai receber ao clicar.</p>
-        </div>
-        <button className="botao-comprar-up-distrito">Preço: 1 🌟</button>
-      </div>
-    </div>
-
-  </div>
-</div>
       )}
 
     </div>
