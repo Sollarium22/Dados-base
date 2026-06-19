@@ -2,7 +2,7 @@
 
 // VERSIONAMENTO DE SAVE
 
-export const VERSAO_ATUAL = 1.3;
+export const VERSAO_ATUAL = 1.31;
 
 export const DEFAULT_SAVE = {
     version: VERSAO_ATUAL,
@@ -29,27 +29,37 @@ export const DEFAULT_SAVE = {
         distritoBase: {
             aberto: false,
             upgrades: [
-                {id: "ascensaodps", comprado: false }
+                { id: "ascensaodps", comprado: false },
+                { id: "upgradeSim", comprado: false },
+                { id: "upgradeNao", comprado: false, },
             ]
         },
 
         distritoAscensao: {
             aberto: false,
             upgrades: [
-                { id: "ascensao1", comprado: false}
+                { id: "ascensao1", comprado: false,},
+                { id: "ascensaoBifurcada1", comprado: false,   },
+                {id: "ascensaoBifurcada2", comprado: false, }
             ]
         },
         distritoOrdem: {
             aberto: false,
             upgrades: [
-                { id: "ordem1", comprado: false}
+                { id: "ordem1", comprado: false }
             ]
         },
         distritoReliquias: {
             aberto: false,
+            upgrades: [
+                {  id: "reliquia1",  comprado: false,  }
+            ]
         },
         distritoRayboom: {
             aberto: false,
+            upgrades: [
+                {  id: "rayboom1",comprado: false, }
+            ]
         }
     },
 };
@@ -96,25 +106,25 @@ const migracoes = {
 
         const ascensaoAtt1 = {
             ...saveAntigo.ascensao,  //
-         //se for garantir que existe: prestigioTotal: saveAntigo.ascensao?.prestigioTotal ?? 0,
+            //se for garantir que existe: prestigioTotal: saveAntigo.ascensao?.prestigioTotal ?? 0,
 
             distritoBase: {
                 aberto: false,
                 upgrades: [
-                    { id: "ascensaodps", comprado: false}
+                    { id: "ascensaodps", comprado: false }
                 ]
             },
 
             distritoAscensao: {
                 aberto: false,
                 upgrades: [
-                    {id: "ascensao1", comprado: false}
+                    { id: "ascensao1", comprado: false }
                 ]
             },
             distritoOrdem: {
                 aberto: false,
                 upgrades: [
-                    {id: "ordem1", comprado: false}
+                    { id: "ordem1", comprado: false }
                 ]
             },
             distritoReliquias: {
@@ -127,8 +137,57 @@ const migracoes = {
         }
         return {
             ...saveAntigo,
-            version:1.3,
+            version: 1.3,
             ascensao: ascensaoAtt1
+        }
+    },
+    1.3: (saveAntigo) => {
+        console.log("Migrando da versao 1.3 para 1.31")
+        const ascensaoAtt2 = {
+            ...saveAntigo.ascensao,  //
+            //se for garantir que existe: prestigioTotal: saveAntigo.ascensao?.prestigioTotal ?? 0,
+
+             distritoBase: {
+            aberto: false,
+            upgrades: [
+                { id: "ascensaodps", comprado: false },
+                { id: "upgradeSim", comprado: false },
+                { id: "upgradeNao", comprado: false, },
+            ]
+        },
+
+        distritoAscensao: {
+            aberto: false,
+            upgrades: [
+                { id: "ascensao1", comprado: false,},
+                { id: "ascensaoBifurcada1", comprado: false,   },
+                {id: "ascensaoBifurcada2", comprado: false, }
+            ]
+        },
+        distritoOrdem: {
+            aberto: false,
+            upgrades: [
+                { id: "ordem1", comprado: false }
+            ]
+        },
+        distritoReliquias: {
+            aberto: false,
+            upgrades: [
+                {  id: "reliquia1",  comprado: false,  }
+            ]
+        },
+        distritoRayboom: {
+            aberto: false,
+            upgrades: [
+                {  id: "rayboom1",comprado: false, }
+            ]
+        }
+
+        }
+        return {
+            ...saveAntigo,
+            version: 1.31,
+            ascensao: ascensaoAtt2,
         }
     }
 

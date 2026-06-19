@@ -18,6 +18,8 @@ import pata from './pata.png';
 
 import ordem from './Ordem.png';
 import ray from './Ray.png';
+import reli from './Reli.png';
+import asc from './Ascensao.png';
 
 
 function App() {
@@ -173,15 +175,15 @@ function App() {
   // ------------------------------------ASCENCAO--------------------------------------
 
   const DEFAULT_ASCENSAO = {
-    desbloqueado: true,
+    desbloqueado: false,
     prestigio: 0,
     prestigioTotal: 0,
 
     distritoBase: {
-      icone: ordem,
+      icone: dado,
       aberto: false,
       upgrades: [
-        { nome: "Comeaço", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: true, descricao: "Você ganha 1% de dps por nivel de prestigio", icone: "🌟", preRequisito: null, x: 0, y: -140, angulo: -90 }, // Fica 140px acima do centro do distrito 
+        { nome: "Comeaço", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio", icone: "🌟", preRequisito: null, x: 0, y: -140, angulo: -90 }, // Fica 140px acima do centro do distrito 
         {
           id: "upgradeSim",
           nome: "Sim (Bifurcação 1)",
@@ -210,7 +212,7 @@ function App() {
 
     // 2. DISTRITO ASCENSÃO (Cresce para a Direita)
     distritoAscensao: {
-      icone: ordem,
+      icone: asc,
       aberto: false,
       upgrades: [
         {
@@ -218,7 +220,7 @@ function App() {
           nome: "Tempo",
           preco: 1,
           efeito: "duplicarClick",
-          comprado: true,
+          comprado: false,
           descricao: "Você duplica seu Click",
           icone: "⏳",
           preRequisito: null,
@@ -272,7 +274,7 @@ function App() {
 
     // 4. DISTRITO RELÍQUIAS (Cresce para Baixo/Esquerda)
     distritoReliquias: {
-      icone: ordem,
+      icone: reli,
       aberto: false,
       upgrades: [
         {
@@ -1064,7 +1066,7 @@ function App() {
                     <div className="info-texto">
                       <span className="nome-item">{u.nome}</span>
                       <span className="preco-item">Preço: {u.preco}</span>
-                      <span className="qtd-item">Qtd: {u.quantidade}</span>
+                      <span className="qtd-item">Qtd: {u.quantidade }</span>
                     </div>
 
                     {/* Caixa flutuante (popup) do Upgrade */}
@@ -1084,7 +1086,7 @@ function App() {
                     <img src={c.icone} alt={c.nome} /> <br />
                     {c.nome} <br />
                     preço: {formatarNumero(getPrecoAtual(c.preco, c.quantidade))} <br />
-                    Quantidade: {c.quantidade} <br />
+                    Quantidade: {c.quantidade + c.quantidadeGratis} <br />
                     {/* Caixa flutuante (popup) com informações extras */}
                     <div className="popup-info">
                       <strong>{c.nome}</strong>
