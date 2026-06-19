@@ -17,7 +17,11 @@ export const DEFAULT_SAVE = {
     upgrade: [
         { id: "click1", comprado: false },
         { id: "dados1", comprado: false },
-        { id: "dados2", comprado: false }
+        { id: "dados2", comprado: false },
+        { id: "clickDps1", comprado: false},
+        
+        //ascensao
+        { id: "contagemRay1", comprado: false},
     ],
     vinho: { desbloqueado: false, level: 1, creditos: 0, mercado: 1 },
 
@@ -143,6 +147,15 @@ const migracoes = {
     },
     1.3: (saveAntigo) => {
         console.log("Migrando da versao 1.3 para 1.31")
+        const upgradeAtt1 = [
+            ...saveAntigo.upgrade,
+            { id: "clickDps1", comprado: false},
+        
+        //ascensao
+            { id: "contagemRay1", comprado: false},
+
+        ]
+
         const ascensaoAtt2 = {
             ...saveAntigo.ascensao,  //
             //se for garantir que existe: prestigioTotal: saveAntigo.ascensao?.prestigioTotal ?? 0,
@@ -188,6 +201,7 @@ const migracoes = {
             ...saveAntigo,
             version: 1.31,
             ascensao: ascensaoAtt2,
+            upgrade: upgradeAtt1
         }
     }
 
