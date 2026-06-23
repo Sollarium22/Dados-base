@@ -19,8 +19,15 @@ import asc from './Ascensao.png';
 
   const b_novato = 0.5;
   const b_guerreiro = 1;
-  const b_mago = 100_000;
+  const b_mago = 5;
   const b_medico = 15;
+  const b_ladino = 450;  
+  const b_pugilista = 1000;       
+const b_bardo = 3_200;         // Custo: 85.000 (Rendimento de ~3.7% por segundo)
+const b_paladino = 22_000;     // Custo: 450.000 (Rendimento de ~4.8% por segundo)
+const b_druida = 150_000;      // Custo: 2.500.000 (Rendimento de ~6% por segundo)
+const b_cacador = 1_350_000;   // Custo: 18.000.000 (Rendimento de ~7.5% por segundo)
+const b_necromante = 11_000_000; 
 
 
 
@@ -28,9 +35,63 @@ import asc from './Ascensao.png';
 export const DEFAULT_CONSTRUCOES = [
     { nome: "Novato", preco: 15, dps: b_novato, quantidade: 0, quantidadeGratis: 0, icone: galho, descricao: "Ele...era...o FrostBite...", assin: "- Chris...pré depressão" },
     { nome: "Guerreiro", preco: 100, dps: b_guerreiro, quantidade: 0, icone: espada, descricao: "Um Guerreiro nao muito habilidoso...bem...ele sabe usar a espada pra fazer um churrasco" },
-    { nome: "Mago", preco: 10, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
+    { nome: "Mago", preco: 1000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
     { nome: "Medico de Campo", preco: 2000, dps: b_medico, quantidade: 0, icone: cajado, descricao: "ENTÃO SÓ SE MATA", assin: "- Leandrinho do Grau" },
-    { nome: "Pugilista", preco: 2000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "VEM PRA CIMA, EU TANKO", assin: "- Jurandir  (spoiler, ele nao tanka)" },
+    { nome: "Pugilista", preco: 5000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "VEM PRA CIMA, EU TANKO", assin: "- Jurandir  (spoiler, ele nao tanka)" },
+    { 
+      nome: "Ladino", 
+      preco: 15_000, 
+      dps: b_ladino, // Lembre-se de declarar essa variável de dano base no topo do arquivo
+      quantidade: 0, 
+      icone: cajado, // Certifique-se de importar o ícone correspondente
+      descricao: "Sumiu com as moças da taverna, com o ouro do grupo e misteriosamente aumentou o DPS.", 
+      assin: "- Guarda da Cidade (furioso)" 
+    },
+    { 
+      nome: "Bardo", 
+      preco: 85_000, 
+      dps: b_bardo, 
+      quantidade: 0, 
+      icone: cajado, 
+      descricao: "Tenta seduzir absolutamente qualquer coisa que se mova. O dado rolou 1, agora ele é casado com um golem de pedra.", 
+      assin: "- Narrador cansado" 
+    },
+    { 
+      nome: "Paladino", 
+      preco: 450_000, 
+      dps: b_paladino, 
+      quantidade: 0, 
+      icone: cajado, 
+      descricao: "Brilha tanto que serve de lâmpada para o santuário. Fala de honra a cada 3 segundos e ninguém mais aguenta.", 
+      assin: "- O resto da party" 
+    },
+    { 
+      nome: "Druida", 
+      preco: 2_500_000, 
+      dps: b_druida, 
+      quantidade: 0, 
+      icone: cajado, 
+      descricao: "Se transformou em um urso no meio do combate. O problema é que ele esqueceu como volta a ser humano.", 
+      assin: "- Biólogo do Reino" 
+    },
+    { 
+      nome: "Caçador", 
+      preco: 18_000_000, 
+      dps: b_cacador, 
+      quantidade: 0, 
+      icone: cajado, 
+      descricao: "Diz que a culpa da flecha ter acertado o Guerreiro foi do vento, mesmo jogando em uma caverna fechada.", 
+      assin: "- Legolas da Shopee" 
+    },
+    { 
+      nome: "Necromante", 
+      preco: 120_000_000, 
+      dps: b_necromante, 
+      quantidade: 0, 
+      icone: cajado, 
+      descricao: "Não é das trevas, ele só quer amigos que não reclamem de carregar as malas dele na masmorra.", 
+      assin: "- Coveiro terceirizado" 
+    },
     //{ nome: "Lo testador", preco: 10000000000000000, dps: 101000000000, quantidade: 0, icone: dado, descricao:"ABSOLUTA", assin: "SIM"}, 
   ]
 
@@ -224,4 +285,132 @@ export const DEFAULT_DOURADO = [
     efeito: "Instantaneo",
     peso: 4
   }
+]
+
+export const DEFAULT_CONQUISTAS = [
+  //Click
+   {
+    nome: "Crítico Decisivo", 
+    tipo: 'valorClick', 
+    quantidade: 20, 
+    id: 'click2', 
+    obtido: false, 
+    descricao: "Seu clique agora bate como um 20 natural modificado. O mestre chorou no escudo."
+  },
+  {
+    nome: "Tendinite Divina", 
+    tipo: 'valorClick', 
+    quantidade: 100, 
+    id: 'click3', 
+    obtido: false, 
+    descricao: "Você transcendeu o mouse. Seu dedo virou um artefato místico lendário +5."
+  },
+
+  {
+    nome: "Click de duas mãos", 
+    tipo: 'valorClick', 
+    quantidade: 50, 
+    id: 'click4', 
+    obtido: false, 
+    descricao: "Você equipou o mouse com as duas mãos para rolar o dano máximo. Totalmente ilegal."
+  },
+  {
+    nome: "Furto de Dados", 
+    tipo: 'valorClick', 
+    quantidade: 250, 
+    id: 'click5', 
+    obtido: false, 
+    descricao: "Seu clique rouba a alma dos monstros antes mesmo do mestre narrar a iniciativa."
+  },
+  {
+    nome: "Mouse de Adamantium", 
+    tipo: 'valorClick', 
+    quantidade: 1_000, 
+    id: 'click6', 
+    obtido: false, 
+    descricao: "Seu clique gera tanta energia que o ferreiro do reino quer usar seu mouse como bigorna."
+  },
+
+  // {nome: "Click fortinho", tipo:'valorClick',quantidade: 10 ,id:'click1', obtido:false, descricao: "Faça 1000 com apenas 1 click"},
+ 
+
+  //Total
+  {nome: "O primeiro", tipo:'contagemTotal',quantidade: 1, id:'bater1', obtido:false, descricao: "Voce Rolou o dado pela primeira vez...boa sorte"},
+  {nome: "Uau...isso da um combate", quantidade: 1_000,tipo:'contagemTotal', id:'bater2', obtido:false, descricao: "Obtenha 1000"},
+   {
+    nome: "Síndrome do Dragão", 
+    tipo: 'contagemTotal', 
+    quantidade: 100_000, 
+    id: 'total_acumula', 
+    obtido: false, 
+    descricao: "Acumulou ouro suficiente para dormir em cima dele e ignorar a campanha principal."
+  },
+  {
+    nome: "Capitalismo de Campanha", 
+    tipo: 'contagemTotal', 
+    quantidade: 1_000_000, 
+    id: 'total_milhao', 
+    obtido: false, 
+    descricao: "Parabéns, você comprou a taverna, a guilda, o reino e provavelmente o próprio mestre do jogo."
+  },
+  
+  //CPS
+  {nome: "Matando Devagarinho", tipo:'dps',quantidade:1, id:'dps1', obtido:false, descricao: "Voce consegue agora acertar 1 inimigo por segundo...parabens...eu acho..."},
+  {
+    nome: "Combo de Monge", 
+    tipo: 'dps', 
+    quantidade: 100, 
+    id: 'dps_monge', 
+    obtido: false, 
+    descricao: "Cem atualizações por segundo. Você está batendo tão rápido que o turno virou tempo real."
+  },
+  {
+    nome: "Metagaming Puro", 
+    tipo: 'dps', 
+    quantidade: 10_000, 
+    id: 'dps_meta', 
+    obtido: false, 
+    descricao: "Seu DPS quebrou a matemática do sistema. O mestre desistiu e foi jogar videogame."
+  },
+
+
+  // Construcoes
+  {nome: "Novato...é...só isso", tipo:'construcao', parametro:{nome: "Novato"}, quantidade: 1, id:'novato1', obtido:false, descricao: "Um novato...que fica ai...(ele nao sabe usar a ficha...)"},
+  {
+    nome: "Onde está minha carteira?", 
+    tipo: 'construcao', 
+    parametro: { nome: "Ladino" }, 
+    quantidade: 1, 
+    id: 'const_ladino_1', 
+    obtido: false, 
+    descricao: "Recrutou um Ladino. Seu DPS subiu, mas você jurava que tinha mais moedas guardadas..."
+  },
+  {
+    nome: "Toca Raul!", 
+    tipo: 'construcao', 
+    parametro: { nome: "Bardo" }, 
+    quantidade: 5, 
+    id: 'const_bardo_5', 
+    obtido: false, 
+    descricao: "Cinco bardos tocando a mesma música ao mesmo tempo. Os monstros estão morrendo de dor de cabeça."
+  },
+  {
+    nome: "Zoológico Incremental", 
+    tipo: 'construcao', 
+    parametro: { nome: "Druida" }, 
+    quantidade: 10, 
+    id: 'const_druida_10', 
+    obtido: false, 
+    descricao: "Dez druidas transformados em guaxinins. Eles não atacam, mas reviram o lixo dos monstros com maestria."
+  },
+
+
+
+
+
+
+
+  // Quantidade de construcoes
+  {nome: "Uma party...é...uma party", id:"const_total_5", obtido: false, descricao: "Tenha 5 pessoas em sua party",
+    check: (s) => s.construcoes?.reduce((soma, c) => soma + c.quantidade, 0) >= 5 },
 ]

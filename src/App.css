@@ -1116,3 +1116,173 @@ body {
 .tooltip-up-cookies strong { display: block; font-size: 13px; color: #e0aaff; margin-bottom: 4px; text-align: left; }
 .tooltip-up-cookies p { margin: 0 0 6px 0; font-size: 11px; color: #c77dff; line-height: 1.4; text-align: left; }
 .tooltip-up-cookies small { display: block; font-size: 10px; color: #00f5d4; font-weight: bold; text-align: left; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* MENU ESTATISTICAS */
+
+/* CONTAINER FLUTUANTE: Cobre toda a tela por cima do jogo */
+.overlay-estatisticas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(6, 4, 8, 0.9); /* Fundo bem escuro e semi-transparente */
+  z-index: 10000; /* Acima de absolutamente tudo */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* CAIXA CENTRAL DO MENU */
+.conteudo-estatisticas {
+  width: 60%;
+  max-width: 800px;
+  height: 80vh;
+  background: radial-gradient(circle, #1c1124 0%, #0d0912 100%);
+  border: 4px ridge #5a2c85; /* Mesma borda roxa das colunas */
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(160, 78, 246, 0.1);
+  overflow-y: auto; /* Permite rolar se tiver muitas conquistas */
+  box-sizing: border-box;
+}
+
+/* TÍTULOS DO MENU */
+.conteudo-estatisticas h2 {
+  color: #ff3344;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255, 51, 68, 0.5);
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #5a2c85;
+  padding-bottom: 10px;
+}
+
+/* LISTA DE TEXTOS DE ESTATÍSTICAS */
+.lista-estatisticas {
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.lista-estatisticas p {
+  margin: 8px 0;
+  color: #d1cbd4;
+}
+
+.lista-estatisticas strong {
+  color: #a04ef6; /* Destaca os valores em roxo */
+}
+
+/* GRADE DAS CONQUISTAS */
+.grade-conquistas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+/* QUADRADOS DAS CONQUISTAS (BLOQUEADO) */
+.quadrado-conquista {
+  width: 80px;
+  height: 80px;
+  background-color: #0b070e; /* Quadrado quase preto */
+  border: 2px solid #23192b;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s ease;
+  cursor: help;
+  opacity: 0.5; /* Opaco enquanto bloqueado */
+  filter: grayscale(1);
+}
+
+/* ESTADO QUANDO ESTIVER DESBLOQUEADO (checkConquista === true) */
+.quadrado-conquista.desbloqueado {
+  background-color: #170d22;
+  border: 2px solid #ff3344; /* Borda vermelha de conquista */
+  box-shadow: 0 0 10px rgba(255, 51, 68, 0.4);
+  opacity: 1;
+  filter: grayscale(0);
+}
+
+/* BOTÃO DE FECHAR O MENU */
+.botao-fechar {
+  background: #5a2c85;
+  color: #e0d9cc;
+  border: 2px solid #ff3344;
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin-top: 20px;
+  transition: background 0.2s;
+}
+
+.botao-fechar:hover {
+  background: #ff3344;
+  color: #060408;
+}
+
+/* Botao estatisticas */
+
+.botao-estatisticas {
+  /* Fixa o elemento na tela em relação ao navegador */
+  position: fixed; 
+  top: 10px; /* Bem colado na parte superior */
+  left: 15%; /* Metade da largura da sua coluna (30% / 2) */
+  transform: translateX(-50%); /* Centraliza perfeitamente na coluna */
+  z-index: 1000; /* Fica acima de qualquer card ou borda */
+
+  background-color: #0e0a12;
+  color: #d1cbd4;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  
+  border: 2px solid #5a2c85; 
+  border-radius: 4px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Efeito de hover */
+.botao-estatisticas:hover {
+  color: #ffffff;
+  border-color: #ff3344;
+  background-color: #1c1124;
+  box-shadow: 0 0 12px rgba(255, 51, 68, 0.6);
+}
+
+.botao-estatisticas:active {
+  transform: scale(0.95);
+}

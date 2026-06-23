@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, version } from 'react';
 
 import { motion, PresenceContext, useAnimation } from 'framer-motion';
 import { VERSAO_ATUAL, DEFAULT_SAVE, processarSave } from './Versionamento';
-import { DEFAULT_ASCENSAO, DEFAULT_MELHORIAS, DEFAULT_VINHO, DEFAULT_CONSTRUCOES, DEFAULT_DOURADO } from './DEFAULT';
+import { DEFAULT_ASCENSAO, DEFAULT_MELHORIAS, DEFAULT_VINHO, DEFAULT_CONSTRUCOES, DEFAULT_DOURADO, DEFAULT_CONQUISTAS } from './DEFAULT';
 
 // ICONS
 import logo from './logo.svg';
@@ -116,6 +116,7 @@ function App() {
   const [click, setClick] = useState(1); // clic
   const [construcoes, setConstrucoes] = useState(DEFAULT_CONSTRUCOES);
   const [upgrade, setUpgrade] = useState(DEFAULT_MELHORIAS);
+  const [conquistas, setConquistas] = useState(DEFAULT_CONQUISTAS);
 
   const [contagemTotal, setContagemTotal] = useState(0)// TODOS JA CONSEGUIDOS
   const [ritual, setRitual] = useState(null);
@@ -124,8 +125,8 @@ function App() {
 
   // ==============================AVISOS================================================
 
-  function mostrarAviso(texto){
-    setAviso({texto, id: Date.now()})
+  function mostrarAviso(texto) {
+    setAviso({ texto, id: Date.now() })
   }
 
   // =============================SIMPLIFICADOR DE NUMEROS================================
@@ -333,17 +334,17 @@ function App() {
     })
   }
 
-  useEffect(() =>{
-    const intervalo = setInterval(() =>{
+  useEffect(() => {
+    const intervalo = setInterval(() => {
       if (Math.random() < 0.25) {
-       spawnRitual()
+        spawnRitual()
 
       }
     }, 30000);
     return () => clearInterval(intervalo);
   }, [])
 
-  useEffect(() =>{
+  useEffect(() => {
     if (!ritual) return;
 
     const timeOut = setTimeout(() => {
@@ -352,58 +353,58 @@ function App() {
   })
 
 
- function efeitoRitual(){
-  setRitual(null);
-  const efeito = rollEfeito();
-  if (!efeito) return;
+  function efeitoRitual() {
+    setRitual(null);
+    const efeito = rollEfeito();
+    if (!efeito) return;
 
-  mostrarAviso(`RITUAL ${efeito.nome}`);
+    mostrarAviso(`RITUAL ${efeito.nome}`);
 
-  // Se no objeto estiver "Instantaneo", encerra aqui
-  if (efeito.efeito === "Instantaneo" || efeito.efeito === "instantaneo"){
+    // Se no objeto estiver "Instantaneo", encerra aqui
+    if (efeito.efeito === "Instantaneo" || efeito.efeito === "instantaneo") {
       contagemInstantanea(efeito.nome);
-    return;
+      return;
+    }
+
+    setBuff(prev => [
+      ...prev,
+      {
+        nome: efeito.nome,
+        tipo: efeito.efeito, // Mudamos aqui para pegar o .efeito ("DPS", "Click") e salvar como tipo
+        mult: Number(efeito.mult), // Garante que seja um número para a multiplicação
+        expira: Date.now() + Number(efeito.duracao) * 1000
+      }
+    ]);
   }
 
-  setBuff(prev => [
-    ...prev,
-    {
-      nome: efeito.nome,
-      tipo: efeito.efeito, // Mudamos aqui para pegar o .efeito ("DPS", "Click") e salvar como tipo
-      mult: Number(efeito.mult), // Garante que seja um número para a multiplicação
-      expira: Date.now() + Number(efeito.duracao) * 1000
-    }
-  ]);
-}
-
-  function rollEfeito(){
+  function rollEfeito() {
     const pesoTotal = DEFAULT_DOURADO.reduce((s, e) => s + Number(e.peso), 0);
-  let roll = Math.random() * pesoTotal;
+    let roll = Math.random() * pesoTotal;
 
-  for (const efeito of DEFAULT_DOURADO) {
-    if (roll < Number(efeito.peso)) return efeito;
-    roll -= Number(efeito.peso);
-  }
-    
-  }
-
-  function DPSBuffado(baseDps, buff){
-  const now = Date.now();
-
-  return buff.reduce((dps, b) => { 
-    if (b.expira < now) return dps;
-
-    if (b.tipo === "DPS") {
-      console.log("Aplicando multiplicador: " + b.mult); 
-      return dps * b.mult;
+    for (const efeito of DEFAULT_DOURADO) {
+      if (roll < Number(efeito.peso)) return efeito;
+      roll -= Number(efeito.peso);
     }
-    
 
-    return dps;
-  }, baseDps);
-}
+  }
 
-  function contagemInstantanea(){
+  function DPSBuffado(baseDps, buff) {
+    const now = Date.now();
+
+    return buff.reduce((dps, b) => {
+      if (b.expira < now) return dps;
+
+      if (b.tipo === "DPS") {
+        console.log("Aplicando multiplicador: " + b.mult);
+        return dps * b.mult;
+      }
+
+
+      return dps;
+    }, baseDps);
+  }
+
+  function contagemInstantanea() {
     const ganhoMinutos = DPS * 60 * 30;
 
     const ganhoBanco = contagem * 0.1;
@@ -450,7 +451,7 @@ function App() {
     const bonusPorDps = DPS * percentual;
 
     const clickSemBuff = clickBaseFinal + bonusPorDps
-    
+
     //TALVEZ...MULTIPLIQUE NO LUGAR DE SOMAR
 
     const now = Date.now();
@@ -536,8 +537,8 @@ function App() {
 
 
       setDps(producao);
-      setContagem((atual) => atual + (deltaSeconds*producao));
-      setContagemTotal((atual) => atual + (deltaSeconds*producao));
+      setContagem((atual) => atual + (deltaSeconds * producao));
+      setContagemTotal((atual) => atual + (deltaSeconds * producao));
     }, 100); //a cada 1 segundo roda aqui
     return () => clearInterval(timer);//limpa o timer
   }, [construcoes, upgrade, buff]);
@@ -835,10 +836,126 @@ function App() {
     }, 1000) // define para eles ficarem por 1 segundo
   };
 
+  //================AVISO PERSISTENTE ====================
+
+  const [avisosPersistentes, setAvisosPersistentes] = useState([]);
+
+  function mostrarAvisoPersistentes(texto, icone = null) {
+    setAvisosPersistentes(prev => [...prev, { texto, icone, id: Date.now() + Math.random() }]);
+  }
+
+  function fecharAvisoPersistente(id) {
+    setAvisosPersistentes(prev => prev.filter(a => a.id !== id));
+  }
+
+  function limparAvisosPersistentes() {
+    setAvisosPersistentes([]);
+  }
+
+  //===================CONQUISTAS=============================
+
+  useEffect(() => {
+    const estado = { contagemTotal, DPS, construcoes, click }
+
+    const novasConquistas = conquistas.filter(c => !c.obtido && checkConquista(c, estado))
+
+    if (novasConquistas.length === 0) return;
+
+    novasConquistas.forEach(c => {
+      mostrarAvisoPersistentes(`Nova conquista ${c.nome}`)
+    })
+
+    const idsObtidos = new Set(novasConquistas.map(c => c.id));
+    setConquistas(prev => prev.map(c =>
+      idsObtidos.has(c.id) ? { ...c, obtido: true } : c));
+
+  }, [contagemTotal, DPS])
+
+  function checkConquista(conquista, state) {
+    if (conquista.check) return conquista.check(state);
+
+    switch (conquista.tipo) {
+      case 'contagemTotal':
+        return state.contagemTotal >= conquista.quantidade;
+      case 'dps':
+        return state.DPS >= conquista.quantidade;
+      case 'construcao':
+        return (state.construcoes?.find(c => c.nome === conquista.parametro?.nome)?.quantidade ?? 0) >= conquista.quantidade;
+      case 'valorClick':
+        return state.click >= conquista.quantidade;
+      default:
+        return false;
+    }
+  }
 
   // =============================================HTML=========================================
   return (
     <div className="App">
+
+      {/* AVISOS PERSISTENTES */}
+
+      <div
+        style={{ position: "fixed", left: 0, right: 0, bottom: 0, padding: "10px 0", display: "flex", flexDirection: "column-reverse", alignItems: "center", gap: "8px", zIndex: 9998, pointerEvents: "none" }}
+      >
+        {(() => {
+          // Mostra só os 3 mais antigos. Os novos esperam na fila; fechar um dos visíveis revela o próximo. Nunca some sem ser visto.
+          const MAX_VISIVEIS = 3;
+          const visiveis = avisosPersistentes.slice(0, MAX_VISIVEIS);
+          const esperando = avisosPersistentes.length - visiveis.length;
+          // Botão aparece quando há 2+ avisos OU há fila esperando.
+          return (
+            <>
+              {visiveis.map(a => (
+                <div
+                  key={a.id}
+                  onClick={() => fecharAvisoPersistente(a.id)}
+                  style={{
+                    pointerEvents: "auto", background: "rgba(0, 0, 0, 0.85)", color: "#a964e2", border: "2px solid #a964e2", borderRadius: "8px", padding: "12px 40px 12px 16px",
+                    fontSize: "15px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    maxWidth: "600px",
+                    position: "relative",
+                    boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "14px",
+                  }}
+                  title="Clique para fechar"
+                >
+                  {a.icone}
+                  <span>{a.texto}</span>
+                  <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: "18px", color: "#aaa" }}>×</span>
+                </div>
+              ))}
+
+              {(avisosPersistentes.length >= 2 || esperando > 0) && (
+                <button
+                  onClick={limparAvisosPersistentes}
+                  style={{
+                    pointerEvents: "auto",
+                    background: "rgba(0, 0, 0, 0.85)",
+                    color: "#fff",
+                    border: "2px solid #888",
+                    borderRadius: "6px",
+                    padding: "6px 14px",
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    boxShadow: "0 0 8px rgba(0,0,0,0.4)",
+                  }}
+                  title="Fecha todos os avisos"
+                >
+                  {esperando > 0
+                    ? `Limpar notificações, +${esperando} na fila`
+                    : `Limpar notificações`}
+                </button>
+              )}
+            </>
+          );
+        })()}
+      </div>
+
 
       {/* Avisos gerais */}
       <div
@@ -876,26 +993,84 @@ function App() {
 
 
 
+
       {ritual && telaAtual !== "pilares" && (
-      <div
-        onClick={efeitoRitual}
-        style={{
-          position: 'fixed',
-          left: ritual.x,
-          top: ritual.y,
-          bottom: 18,
-          //pointerEvents: "none",
-          display: 'flex',
-          justifyContent: "center",
-          zIndex: 9999,
-        }}
-      >
-        <img src={ritual1} style={{height: "150px", width:"150px"}}/> 
-      </div>
+        <div
+          onClick={efeitoRitual}
+          style={{
+            position: 'fixed',
+            left: ritual.x,
+            top: ritual.y,
+            bottom: 18,
+            //pointerEvents: "none",
+            display: 'flex',
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <img src={ritual1} style={{ height: "150px", width: "150px" }} />
+        </div>
       )}
       {telaAtual !== "pilares" && (
         <div className="jogo">
           <div class="lado-esquerdo">
+
+            <button
+              className="botao-estatisticas"
+              onClick={() => setTelaAtual("menu")}
+            >
+              Estatísticas
+            </button>
+            {telaAtual === "menu" && (
+              <div className="overlay-estatisticas">
+                <div className="conteudo-estatisticas">
+                  <h2>Estatísticas do Santuário</h2>
+
+                  <div className="lista-estatisticas">
+                    {/* Substituído 'state.click' pela sua variável/estado direto */}
+                    <p>Valor do Clique: <strong>{click}</strong></p>
+                    <p>Total Acumulado: <strong>{Math.floor(contagemTotal)}</strong></p>
+                    <p>DPS Atual: <strong>{DPS}</strong></p>
+                  </div>
+
+                  <h2>Conquistas</h2>
+                  <div className="grade-conquistas">
+                    {DEFAULT_CONQUISTAS.map((conquista) => {
+
+                      // Criamos um objeto temporário idêntico ao que a função espera receber
+                      const jogoState = {
+                        click: click,
+                        contagemTotal: contagemTotal,
+                        DPS: DPS,
+                        construcoes: construcoes
+                      };
+
+                      // Passamos esse objeto montado para a checagem funcionar perfeitamente
+                      const desbloqueada = checkConquista(conquista, jogoState);
+
+                      return (
+                        <div
+                          key={conquista.id}
+                          className={`quadrado-conquista ${desbloqueada ? 'desbloqueado' : ''}`}
+                          title={desbloqueada
+                            ? `${conquista.nome} - ${conquista.descricao}`
+                            : "Conquista Oculta (Bloqueada)"
+                          }
+                        >
+                          <span style={{ fontSize: '22px' }}>{desbloqueada ? "👁️" : "🔒"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button className="botao-fechar"
+                    onClick={() => setTelaAtual("jogo")}
+                  >
+                    Voltar ao Jogo
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/*LE DOUGLES*/}
             {vinho.desbloqueado && telaAtual === "jogo" && (
@@ -969,6 +1144,9 @@ function App() {
                 </button>
               </div>
             )}
+
+
+
             {/** JANELA DE FAZER KABOOM */}
             {telaAtual === "ascensao" && (
               <div className="overlay-ascensao">
@@ -994,6 +1172,11 @@ function App() {
                 </div>
               </div>
             )}
+
+            {/* Janela ESTATISTICAS */}
+
+
+
 
           </div>
 
@@ -1082,7 +1265,7 @@ function App() {
                     <div className="info-texto">
                       <span className="nome-item">{u.nome}</span>
                       <span className="preco-item">Preço: {u.preco}</span>
-                      <span className="qtd-item">Qtd: {u.quantidade }</span>
+                      <span className="qtd-item">Qtd: {u.quantidade}</span>
                     </div>
 
                     {/* Caixa flutuante (popup) do Upgrade */}
