@@ -1,18 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+
 import { useState, useEffect, useRef, version } from 'react';
-import dado from './d20.png';
-import dodo from './dodo.png';
+
 import { motion, PresenceContext, useAnimation } from 'framer-motion';
 import { VERSAO_ATUAL, DEFAULT_SAVE, processarSave } from './Versionamento';
+import { DEFAULT_ASCENSAO, DEFAULT_MELHORIAS, DEFAULT_VINHO, DEFAULT_CONSTRUCOES, DEFAULT_DOURADO } from './DEFAULT';
 
 // ICONS
-
+import logo from './logo.svg';
+import './App.css';
+import dado from './d20.png';
+import dodo from './dodo.png';
 import galho from './galho.png';
 import espada from './espada.png';
 import arco from './arco.png';
 import cajado from './cajado.png';
 import pata from './pata.png';
+import ritual1 from './ritual.png';
 
 //Icons Distritos
 
@@ -99,26 +102,7 @@ function App() {
 
 
   const [preco, setPreco] = useState(15);// preco
-  const DEFAULT_CONSTRUCOES = [
-    { nome: "Novato", preco: 15, dps: b_novato, quantidade: 0, quantidadeGratis: 0, icone: galho, descricao: "Ele...era...o FrostBite...", assin: "- Chris...pré depressão" },
-    { nome: "Guerreiro", preco: 100, dps: b_guerreiro, quantidade: 0, icone: espada, descricao: "Um Guerreiro nao muito habilidoso...bem...ele sabe usar a espada pra fazer um churrasco" },
-    { nome: "Mago", preco: 10, dps: b_mago, quantidade: 0, icone: cajado, descricao: "Um Mago que se gaba de poder lançar magia sem ter que ler nada...só ignoremos o fato dele saber só 1 magia...envelhecer vinhos" },
-    { nome: "Medico de Campo", preco: 2000, dps: b_medico, quantidade: 0, icone: cajado, descricao: "ENTÃO SÓ SE MATA", assin: "- Leandrinho do Grau" },
-    { nome: "Pugilista", preco: 2000, dps: b_mago, quantidade: 0, icone: cajado, descricao: "VEM PRA CIMA, EU TANKO", assin: "- Jurandir  (spoiler, ele nao tanka)" },
-    //{ nome: "Lo testador", preco: 10000000000000000, dps: 101000000000, quantidade: 0, icone: dado, descricao:"ABSOLUTA", assin: "SIM"}, 
-  ]
 
-  const DEFAULT_MELHORIAS = [
-    { nome: "Afiação", preco: "10", efeito: "duplicarClick", comprado: false, id: "click1", icone: dodo, descricao: "Uma pedra de amolar fodasse para vc só usar pra ajudar um pouco" },
-    { nome: "Mochila de Equipamentos", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados1", icone: dodo },
-    { nome: "Espada Nova", preco: "10", efeito: "duplicarDado", comprado: false, id: "dados2", icone: dodo },
-
-    { nome: "Mega espada", preco: "10", efeito: "clickDps", comprado: false, id: "clickDps1", icone: dodo, descricao: "Sua espada propria agora da 1% de seu DPS" },
-
-    { nome: "Cores", preco: "10", efeito: "10porcento", comprado: false, id: "contagemRay1", icone: ray, descricao: "Quem sabe q merda pode rolar aqui" },
-  ]
-
-  const DEFAULT_VINHO = { desbloqueado: false, level: 1, creditos: 0, mercado: 1 }
 
   // FUNCAO PARA CALCULAR O PRECO ATUAL DE CADA CONSTRUCAO
 
@@ -134,6 +118,15 @@ function App() {
   const [upgrade, setUpgrade] = useState(DEFAULT_MELHORIAS);
 
   const [contagemTotal, setContagemTotal] = useState(0)// TODOS JA CONSEGUIDOS
+  const [ritual, setRitual] = useState(null);
+  const [buff, setBuff] = useState([]);
+  const [aviso, setAviso] = useState(false);
+
+  // ==============================AVISOS================================================
+
+  function mostrarAviso(texto){
+    setAviso({texto, id: Date.now()})
+  }
 
   // =============================SIMPLIFICADOR DE NUMEROS================================
   function formatarNumero(num) {
@@ -172,146 +165,10 @@ function App() {
     }
   }, [construcoes])
 
+
+
   // ------------------------------------ASCENCAO--------------------------------------
 
-  const DEFAULT_ASCENSAO = {
-    desbloqueado: false,
-    prestigio: 0,
-    prestigioTotal: 0,
-
-    distritoBase: {
-      icone: dado,
-      aberto: false,
-      upgrades: [
-        { nome: "Comeaço", preco: 1, efeito: "ascensao", id: "ascensaodps", comprado: false, descricao: "Você ganha 1% de dps por nivel de prestigio", icone: "🌟", preRequisito: null, x: 0, y: -140, angulo: -90 }, // Fica 140px acima do centro do distrito 
-        {
-          id: "upgradeSim",
-          nome: "Sim (Bifurcação 1)",
-          preco: 1,
-          comprado: false,
-          descricao: "É um teste do lado esquerdo",
-          icone: "✨",
-          preRequisito: "ascensaodps", // Só aparece se o "Começo" for comprado!
-          x: -60, y: -220, // Move para cima e um pouco para a esquerda
-          angulo: -135
-        },
-        {
-          id: "upgradeNao",
-          nome: "Não (Bifurcação 2)",
-          preco: 1,
-          comprado: false,
-          descricao: "É um teste do lado direito",
-          icone: "🔥",
-          preRequisito: "ascensaodps", // Também depende do "Começo"! Cria a divisão em 2.
-          x: 60, y: -220, // Move para cima e um pouco para a direita
-          angulo: -45
-        },
-
-      ]
-    },
-
-    // 2. DISTRITO ASCENSÃO (Cresce para a Direita)
-    distritoAscensao: {
-      icone: asc,
-      aberto: false,
-      upgrades: [
-        {
-          id: "ascensao1",
-          nome: "Tempo",
-          preco: 1,
-          efeito: "duplicarClick",
-          comprado: false,
-          descricao: "Você duplica seu Click",
-          icone: "⏳",
-          preRequisito: null,
-          x: 110, y: -80,    // Move para cima e para a direita
-          angulo: -40
-        },
-        {
-          id: "ascensaoBifurcada1",
-          nome: "Novo Upgrade Foda",
-          preco: 2,
-          comprado: false,
-          descricao: "Bifurcação de teste",
-          icone: "⚡",
-          preRequisito: "ascensao1", // Trava a dependência no ID do upgrade "Tempo"
-          x: 190, y: -140,          // Afasta o X e o Y um pouco mais do centro
-          angulo: -40
-        },
-        {
-          id: "ascensaoBifurcada2",
-          nome: "Novo Upgrade Foda",
-          preco: 2,
-          comprado: false,
-          descricao: "Bifurcação de teste",
-          icone: "⚡",
-          preRequisito: "ascensao1", // Trava a dependência no ID do upgrade "Tempo"
-          x: 190, y: -80,          // Afasta o X e o Y um pouco mais do centro
-          angulo: 7
-        }
-      ]
-    },
-
-    // 3. DISTRITO ORDEM (Cresce para Baixo/Direita)
-    distritoOrdem: {
-      icone: ordem,
-      aberto: false,
-      upgrades: [
-        {
-          id: "ordem1",
-          nome: "Novato Transcendido",
-          preco: 1,
-          efeito: "novatoGratis",
-          comprado: false,
-          descricao: "Você Ganha 10 novatos gratis",
-          icone: "👥",
-          preRequisito: null,
-          x: 90, y: 100,      // Move para baixo e para a direita
-          angulo: 45
-        }
-      ]
-    },
-
-    // 4. DISTRITO RELÍQUIAS (Cresce para Baixo/Esquerda)
-    distritoReliquias: {
-      icone: reli,
-      aberto: false,
-      upgrades: [
-        {
-          id: "reliquia1",
-          nome: "Relogio de bolso",
-          preco: 1,
-          efeito: "1porcento",
-          comprado: false,
-          descricao: "Algo de sua propria alma, seu reflexo, aumenta 1% do cps base",
-          icone: "🔮",
-          preRequisito: null,
-          x: -90, y: 100,     // Move para baixo e para a esquerda
-          angulo: 135
-        }
-      ]
-    },
-
-    // 5. DISTRITO RAYBOOM (Cresce para a Esquerda)
-    distritoRayboom: {
-      icone: ray,
-      aberto: false,
-      upgrades: [
-        {
-          id: "rayboom1",
-          nome: "Flor Magica",
-          preco: 1,
-          efeito: "caixaRayboom",
-          comprado: false,
-          descricao: "Uma pequena flor que lhe da poderes...interessante",
-          icone: "🌸",
-          preRequisito: null,
-          x: -110, y: -80,   // Move para cima e para a esquerda
-          angulo: -140
-        }
-      ]
-    },
-  }
 
   const [ascensao, setAscensao] = useState(DEFAULT_ASCENSAO)
 
@@ -329,7 +186,6 @@ function App() {
   }, [construcoes])
 
 
-
   //------------------------------------------------------------------------------------------
   //os numeros que surgem do cookie
   const [numeirinhos, setNumeirinhos] = useState([]);
@@ -340,8 +196,6 @@ function App() {
     setContagemTotal((anterior) => anterior + clickRef.current);
 
   }
-
-
 
 
 
@@ -429,7 +283,7 @@ function App() {
     const saveEncriptado = encodeURIComponent(saveTexto)
 
     navigator.clipboard.writeText(saveEncriptado)
-      .then(() => alert("Salvamento copiado com sucesso!"))
+      .then(() => mostrarAviso("Salvamento copiado com sucesso!"))
       .catch(() => alert("Erro ao copiar o save"));
   }
 
@@ -459,6 +313,107 @@ function App() {
     }
 
   }
+  // ==================================RITUAIS=====================================
+
+  function spawnRitual() {
+    const padding = 80;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const x = Math.random() * (width - padding * 2) + padding;
+    const y = Math.random() * (height - padding * 2) + padding;
+
+    const duration = 15000;
+
+    setRitual({
+      x,
+      y,
+      expiresAt: Date.now() + duration
+    })
+  }
+
+  useEffect(() =>{
+    const intervalo = setInterval(() =>{
+      if (Math.random() < 0.25) {
+       spawnRitual()
+
+      }
+    }, 30000);
+    return () => clearInterval(intervalo);
+  }, [])
+
+  useEffect(() =>{
+    if (!ritual) return;
+
+    const timeOut = setTimeout(() => {
+      setRitual(null);
+    }, ritual.expiresAt - Date.now());
+  })
+
+
+ function efeitoRitual(){
+  setRitual(null);
+  const efeito = rollEfeito();
+  if (!efeito) return;
+
+  mostrarAviso(`RITUAL ${efeito.nome}`);
+
+  // Se no objeto estiver "Instantaneo", encerra aqui
+  if (efeito.efeito === "Instantaneo" || efeito.efeito === "instantaneo"){
+      contagemInstantanea(efeito.nome);
+    return;
+  }
+
+  setBuff(prev => [
+    ...prev,
+    {
+      nome: efeito.nome,
+      tipo: efeito.efeito, // Mudamos aqui para pegar o .efeito ("DPS", "Click") e salvar como tipo
+      mult: Number(efeito.mult), // Garante que seja um número para a multiplicação
+      expira: Date.now() + Number(efeito.duracao) * 1000
+    }
+  ]);
+}
+
+  function rollEfeito(){
+    const pesoTotal = DEFAULT_DOURADO.reduce((s, e) => s + Number(e.peso), 0);
+  let roll = Math.random() * pesoTotal;
+
+  for (const efeito of DEFAULT_DOURADO) {
+    if (roll < Number(efeito.peso)) return efeito;
+    roll -= Number(efeito.peso);
+  }
+    
+  }
+
+  function DPSBuffado(baseDps, buff){
+  const now = Date.now();
+
+  return buff.reduce((dps, b) => { 
+    if (b.expira < now) return dps;
+
+    if (b.tipo === "DPS") {
+      console.log("Aplicando multiplicador: " + b.mult); 
+      return dps * b.mult;
+    }
+    
+
+    return dps;
+  }, baseDps);
+}
+
+  function contagemInstantanea(){
+    const ganhoMinutos = DPS * 60 * 30;
+
+    const ganhoBanco = contagem * 0.1;
+
+    const ganho = Math.max(ganhoMinutos, ganhoBanco);
+
+    setContagem(v => v + ganho);
+    setContagemTotal(v => v + ganho);
+    mostrarAviso("Você ganhou " + ganho);
+  }
 
   // =====================================EFEITO DE UPGRADES/COMPRAS==========================================
 
@@ -482,9 +437,6 @@ function App() {
     return total;
   }
 
-
-
-
   //USEFECT DE UPGRADES
   useEffect(() => {
 
@@ -495,10 +447,18 @@ function App() {
 
     // calculo de multiplicador
     const percentual = clickPorDps(upgrade, ascensao);
-
     const bonusPorDps = DPS * percentual;
+
+    const clickSemBuff = clickBaseFinal + bonusPorDps
+    
     //TALVEZ...MULTIPLIQUE NO LUGAR DE SOMAR
-    const clickFinal = clickBaseFinal + bonusPorDps;
+
+    const now = Date.now();
+    const clickBuff = buff.find(b => b.tipo === "Click" && b.expira > now);
+
+
+    const clickFinal = clickBuff ? clickSemBuff * clickBuff.mult : clickSemBuff;
+
 
     setClick(clickFinal);
 
@@ -516,10 +476,7 @@ function App() {
       })
     )
 
-  }, [upgrade, DPS])
-
-
-
+  }, [upgrade, DPS, buff])
 
   //UPGRADES ASCENSAO:
   useEffect(() => {
@@ -536,11 +493,6 @@ function App() {
       )
     );
 
-
-
-
-
-
   }, [ascensao])
 
   //DPS DA CONSTRUCAO
@@ -550,7 +502,16 @@ function App() {
 
   // TEMPO DO JOGO E CONSTRUCOES
   useEffect(() => {
+
+    let lastUpdate = Date.now();
+
+
     const timer = setInterval(() => {
+
+      const now = Date.now();
+      const deltaSeconds = (now - lastUpdate) / 1000;
+
+      lastUpdate = now;
 
       const producaoBase = construcoes.reduce((soma, c) => {
         const quantidadeTotal = c.quantidade + (c.quantidadeGratis || 0)
@@ -570,14 +531,16 @@ function App() {
       // O ? é a simplificacao do if Else, IF - ?, Else - :
       const multiplicadorPrestigio = dspAscensaoAtivo ? 1 + ascensao.prestigioTotal * 0.01 : 1
 
-      const producao = producaoBase * multiplicadorBasico * multiplicadorPrestigio;
+      const producao = DPSBuffado(producaoBase * multiplicadorBasico * multiplicadorPrestigio, buff);
+
+
 
       setDps(producao);
-      setContagem((atual) => atual + producao / 10);
-      setContagemTotal((atual) => atual + producao / 10);
+      setContagem((atual) => atual + (deltaSeconds*producao));
+      setContagemTotal((atual) => atual + (deltaSeconds*producao));
     }, 100); //a cada 1 segundo roda aqui
     return () => clearInterval(timer);//limpa o timer
-  }, [construcoes]);
+  }, [construcoes, upgrade, buff]);
 
 
   function comprarUpgrade(indice) {
@@ -877,6 +840,59 @@ function App() {
   return (
     <div className="App">
 
+      {/* Avisos gerais */}
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 18,
+          pointerEvents: "none",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          zIndex: 9999,
+        }}
+      >
+        {aviso && (
+          <motion.div
+            key={aviso.id}
+            initial={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 0, y: -30 }}
+            transition={{ duration: 3.0 }}
+            style={{
+              position: "absolute",
+              width: "100%",
+              textAlign: "center",
+              fontSize: "20px",
+              fontWeight: "bold",
+              pointerEvents: "none",
+            }}
+          >
+            {aviso.texto}
+          </motion.div>
+        )}
+      </div>
+
+
+
+      {ritual && telaAtual !== "pilares" && (
+      <div
+        onClick={efeitoRitual}
+        style={{
+          position: 'fixed',
+          left: ritual.x,
+          top: ritual.y,
+          bottom: 18,
+          //pointerEvents: "none",
+          display: 'flex',
+          justifyContent: "center",
+          zIndex: 9999,
+        }}
+      >
+        <img src={ritual1} style={{height: "150px", width:"150px"}}/> 
+      </div>
+      )}
       {telaAtual !== "pilares" && (
         <div className="jogo">
           <div class="lado-esquerdo">
@@ -988,9 +1004,9 @@ function App() {
 
             <h1>Buxas Clicker</h1>
             <h2>Total de numeros: {formatarNumero(contagem)}</h2>
-            <h2>Total REAL DE DAOS: {formatarNumero(contagemTotal)}</h2>
+            {/* <h2>Total REAL DE DAOS: {formatarNumero(contagemTotal)}</h2> */}
 
-            <h2>Total click dps {clickPorDps(upgrade, ascensao)}</h2>
+            {/* <h2>Total click dps {formatarNumero(clickPorDps(upgrade, ascensao))}</h2> */}
 
             <h3>DPS: {DPS.toFixed(1)}</h3>
             <motion.img
@@ -1086,7 +1102,7 @@ function App() {
                     <img src={c.icone} alt={c.nome} /> <br />
                     {c.nome} <br />
                     preço: {formatarNumero(getPrecoAtual(c.preco, c.quantidade))} <br />
-                    Quantidade: {c.quantidade + c.quantidadeGratis} <br />
+                    Quantidade: {c.quantidade + (c.quantidadeGratis || 0)} <br />
                     {/* Caixa flutuante (popup) com informações extras */}
                     <div className="popup-info">
                       <strong>{c.nome}</strong>
