@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, version } from 'react';
 import { motion, PresenceContext, useAnimation } from 'framer-motion';
 import { VERSAO_ATUAL, DEFAULT_SAVE, processarSave } from './Versionamento';
 import { DEFAULT_ASCENSAO, DEFAULT_MELHORIAS, DEFAULT_VINHO, DEFAULT_CONSTRUCOES, DEFAULT_DOURADO, DEFAULT_CONQUISTAS } from './DEFAULT';
+import { b_novato,b_guerreiro,b_mago,b_ladino,b_pugilista,b_bardo,b_paladino,b_druida,b_cacador,b_necromante} from './DEFAULT';
+
 
 // ICONS
 import logo from './logo.svg';
@@ -69,11 +71,6 @@ function App() {
     mapaRef.current.scrollLeft = scrollLeft - walkX;
     mapaRef.current.scrollTop = scrollTop - walkY;
   };
-
-  const b_novato = 0.5;
-  const b_guerreiro = 1;
-  const b_mago = 100_000;
-  const b_medico = 15;
 
 
   //TESTE seguir MOUSE
@@ -465,17 +462,41 @@ function App() {
 
 
     //DUPLICA PRIMEIRA CONSTRUCAO
-    const mult_novato = upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length;
-    const novoDado = b_novato * (2 ** mult_novato);
 
-    setConstrucoes((anterior) =>
-      anterior.map((c) => {
-        if (c.nome === "Novato") {
-          return { ...c, dps: novoDado }
-        }
-        return c;
-      })
-    )
+    const mults = {
+    "Novato": upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length,
+    "Guerreiro": upgrade.filter(u => u.efeito === "duplicarGuerreiro" && u.comprado).length,
+    "Ladino": upgrade.filter(u => u.efeito === "duplicarLadino" && u.comprado).length,
+    "Bardo": upgrade.filter(u => u.efeito === "duplicarBardo" && u.comprado).length,
+    "Paladino": upgrade.filter(u => u.efeito === "duplicarPaladino" && u.comprado).length,
+    "Druida": upgrade.filter(u => u.efeito === "duplicarDruida" && u.comprado).length,
+    "Caçador": upgrade.filter(u => u.efeito === "duplicarCacador" && u.comprado).length,
+    "Necromante": upgrade.filter(u => u.efeito === "duplicarNecromante" && u.comprado).length,
+    };
+
+    const danosBases = {
+    "Novato": b_novato,
+    "Guerreiro": b_guerreiro,
+    "Ladino": b_ladino,
+    "Bardo": b_bardo,
+    "Paladino": b_paladino,
+    "Druida": b_druida,
+    "Caçador": b_cacador,
+    "Necromante": b_necromante
+    };
+
+
+     setConstrucoes((anterior) =>
+    anterior.map((c) => {
+      if (mults[c.nome] !== undefined) {
+        const dpsBaseOriginal = danosBases[c.nome] || 0;
+        const dpsCalculado = dpsBaseOriginal * (2 ** mults[c.nome]);
+        
+        return { ...c, dps: dpsCalculado };
+      }
+      return c;
+    })
+  );
 
   }, [upgrade, DPS, buff])
 
@@ -790,7 +811,17 @@ function App() {
   }
 
   //================================== BASE DE UPGRADES ==================
+
   const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
+  const qtdGuerreiro = construcoes.find((c) => c.nome === "Guerreiro")?.quantidade || 0;
+  const qtdLadino = construcoes.find((c) => c.nome === "Ladino")?.quantidade || 0;
+  const qtdBardo = construcoes.find((c) => c.nome === "Bardo")?.quantidade || 0;
+  const qtdPaladino = construcoes.find((c) => c.nome === "Paladino")?.quantidade || 0;
+  const qtdDruida = construcoes.find((c) => c.nome === "Druida")?.quantidade || 0;
+  const qtdCacador = construcoes.find((c) => c.nome === "Caçador")?.quantidade || 0;
+  const qtdNecromante = construcoes.find((c) => c.nome === "Necromante")?.quantidade || 0;
+
+
   //APARECER UPRGADES
   const upgradeDisponiveis = upgrade.
     map((u, i) => ({ ...u, indiceOriginal: i }))
@@ -801,11 +832,27 @@ function App() {
       if (u.id === "dados1" && contagemDado < 1) return false;
       if (u.id === "dados2" && contagemDado < 10) return false;
 
+      //GUERREIRO
+      if (u.id === "guerreiro1" && qtdGuerreiro < 10) return false;
+
+      //LADINO
+      if (u.id === "up_ladino1" && qtdLadino < 10) return false;
+      //BARDO
+      if (u.id === "up_bardo1" && qtdBardo < 10) return false;
+      //PALADINO
+      if (u.id === "up_paladino1" && qtdPaladino < 10) return false;
+      //DRUIDA
+      if (u.id === "up_druida1" && qtdDruida < 10) return false;
+      //CAÇADOR
+      if (u.id === "up_cacador1" && qtdCacador < 10) return false;
+      //NECROMANTE
+      if (u.id === "up_necro1" && qtdNecromante < 10) return false;
+
       const caixaRayboomAtivo = ascensao.distritoRayboom.upgrades.some(up => up.id === "rayboom1" && up.comprado);
 
 
       // Se o upgrade atual for o "Cores" (contagemRay1) e a flor estiver comprada, ele some da lista
-      if (u.id === "contagemRay1" && caixaRayboomAtivo < 1) return false;
+      if (u.id === "contagemRay1" && !caixaRayboomAtivo) return false;
 
 
       return true;

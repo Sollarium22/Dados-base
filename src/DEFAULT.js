@@ -17,17 +17,17 @@ import ray from './Ray.png';
 import reli from './Reli.png';
 import asc from './Ascensao.png';
 
-  const b_novato = 0.5;
-  const b_guerreiro = 1;
-  const b_mago = 5;
-  const b_medico = 15;
-  const b_ladino = 450;  
-  const b_pugilista = 1000;       
-const b_bardo = 3_200;         // Custo: 85.000 (Rendimento de ~3.7% por segundo)
-const b_paladino = 22_000;     // Custo: 450.000 (Rendimento de ~4.8% por segundo)
-const b_druida = 150_000;      // Custo: 2.500.000 (Rendimento de ~6% por segundo)
-const b_cacador = 1_350_000;   // Custo: 18.000.000 (Rendimento de ~7.5% por segundo)
-const b_necromante = 11_000_000; 
+  export const b_novato = 0.5;
+  export const b_guerreiro = 1;
+  export const b_mago = 5;
+  export const b_medico = 15;
+  export const b_ladino = 450;  
+  export const b_pugilista = 1000;       
+  export const b_bardo = 3_200;         // Custo: 85.000 (Rendimento de ~3.7% por segundo)
+  export const b_paladino = 22_000;     // Custo: 450.000 (Rendimento de ~4.8% por segundo)
+  export const b_druida = 150_000;      // Custo: 2.500.000 (Rendimento de ~6% por segundo)
+  export const b_cacador = 1_350_000;   // Custo: 18.000.000 (Rendimento de ~7.5% por segundo)
+  export const b_necromante = 11_000_000; 
 
 
 
@@ -103,6 +103,65 @@ export  const DEFAULT_MELHORIAS = [
     { nome: "Mega espada", preco: "10", efeito: "clickDps", comprado: false, id: "clickDps1", icone: dodo, descricao: "Sua espada propria agora da 1% de seu DPS" },
 
     { nome: "Cores", preco: "10", efeito: "10porcento", comprado: false, id: "contagemRay1", icone: ray, descricao: "Quem sabe q merda pode rolar aqui" },
+  
+
+    { 
+    nome: "Luvas de Veludo", 
+    preco: 25_000, 
+    efeito: "duplicarLadino", 
+    comprado: false, 
+    id: "up_ladino1", 
+    icone: dodo, 
+    descricao: "Garante passos mais silenciosos. Dobra o DPS dos Ladinos." 
+  },
+  { 
+    nome: "Alaude de Cordas de Aço", 
+    preco: 150_000, 
+    efeito: "duplicarBardo", 
+    comprado: false, 
+    id: "up_bardo1", 
+    icone: dodo, 
+    descricao: "O som fica tão alto que dobra o DPS dos Bardos (e a dor de cabeça da guilda)." 
+  },
+  { 
+    nome: "Polidor de Armadura", 
+    preco: 900_000, 
+    efeito: "duplicarPaladino", 
+    comprado: false, 
+    id: "up_paladino1", 
+    icone: dodo, 
+    descricao: "O brilho ofusca tanto os monstros que dobra o DPS dos Paladinos." 
+  },
+  { 
+    nome: "Adubo Orgânico Ritualístico", 
+    preco: 5_000_000, 
+    efeito: "duplicarDruida", 
+    comprado: false, 
+    id: "up_druida1", 
+    icone: dodo, 
+    descricao: "A conexão com a natureza triplica. Dobra o DPS dos Druidas." 
+  },
+  { 
+    nome: "Mira Holográfica de Madeira", 
+    preco: 36_000_000, 
+    efeito: "duplicarCacador", 
+    comprado: false, 
+    id: "up_cacador1", 
+    icone: dodo, 
+    descricao: "Eles ainda erram, mas agora com estilo. Dobra o DPS dos Caçadores." 
+  },
+  { 
+    nome: "Diploma em Medicina Legal", 
+    preco: 250_000_000, 
+    efeito: "duplicarNecromante", 
+    comprado: false, 
+    id: "up_necro1", 
+    icone: dodo, 
+    descricao: "Para que reviver os mortos se você pode fazê-los trabalhar com eficiência? Dobra o DPS dos Necromantes." 
+  }
+  
+  
+  
   ]
 
 export  const DEFAULT_VINHO = { desbloqueado: false, level: 1, creditos: 0, mercado: 1 }
@@ -376,39 +435,10 @@ export const DEFAULT_CONQUISTAS = [
 
   // Construcoes
   {nome: "Novato...é...só isso", tipo:'construcao', parametro:{nome: "Novato"}, quantidade: 1, id:'novato1', obtido:false, descricao: "Um novato...que fica ai...(ele nao sabe usar a ficha...)"},
-  {
-    nome: "Onde está minha carteira?", 
-    tipo: 'construcao', 
-    parametro: { nome: "Ladino" }, 
-    quantidade: 1, 
-    id: 'const_ladino_1', 
-    obtido: false, 
-    descricao: "Recrutou um Ladino. Seu DPS subiu, mas você jurava que tinha mais moedas guardadas..."
-  },
-  {
-    nome: "Toca Raul!", 
-    tipo: 'construcao', 
-    parametro: { nome: "Bardo" }, 
-    quantidade: 5, 
-    id: 'const_bardo_5', 
-    obtido: false, 
-    descricao: "Cinco bardos tocando a mesma música ao mesmo tempo. Os monstros estão morrendo de dor de cabeça."
-  },
-  {
-    nome: "Zoológico Incremental", 
-    tipo: 'construcao', 
-    parametro: { nome: "Druida" }, 
-    quantidade: 10, 
-    id: 'const_druida_10', 
-    obtido: false, 
-    descricao: "Dez druidas transformados em guaxinins. Eles não atacam, mas reviram o lixo dos monstros com maestria."
-  },
-
-
-
-
-
-
+  {nome: "4 Pugilistas 4 braços...não pera... a conta nao bate", tipo:'construcao', parametro:{nome: "Pugilista"}, quantidade: 4, id:'pugilista1', obtido:false, descricao: "Um novato...que fica ai...(ele nao sabe usar a ficha...)"},
+  {nome: "Onde está minha carteira?", tipo: 'construcao', parametro: { nome: "Ladino" }, quantidade: 1, id: 'const_ladino_1', obtido: false,  descricao: "Recrutou um Ladino. Seu DPS subiu, mas você jurava que tinha mais moedas guardadas..."},
+  {nome: "Toca Raul!", tipo: 'construcao', parametro: { nome: "Bardo" }, quantidade: 5, id: 'const_bardo_5', obtido: false, descricao: "Cinco bardos tocando a mesma música ao mesmo tempo. Os monstros estão morrendo de dor de cabeça."},
+  {nome: "Zoológico Incremental", tipo: 'construcao',  parametro: { nome: "Druida" },  quantidade: 10,    id: 'const_druida_10',   obtido: false,  descricao: "Dez druidas transformados em guaxinins. Eles não atacam, mas reviram o lixo dos monstros com maestria."},
 
   // Quantidade de construcoes
   {nome: "Uma party...é...uma party", id:"const_total_5", obtido: false, descricao: "Tenha 5 pessoas em sua party",
