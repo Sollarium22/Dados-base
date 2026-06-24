@@ -1,7 +1,8 @@
 //UTILITARIOS PARA ORGANIZAR MELHOR
 
+import { useState } from "react";
 // FORMATAR NUMERO
- function formatarNumero(num) {
+ export function formatarNumero(num) {
     if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
 
     // Sufixos no plural e no singular emparelhados por índice
@@ -23,7 +24,44 @@
 
 // AVISOS
 
-function mostrarAviso(texto){
-    setAviso({texto, id: Date.now()})
+
+
+// AVISOS PERSISTENTEs
+
+export function useAvisosPersistentes() {
+  const [avisosPersistentes, setAvisosPersistentes] = useState([]);
+
+  function mostrarAvisoPersistente(texto, icone = null) {
+    setAvisosPersistentes(prev => [
+      ...prev, 
+      { texto, icone, id: Date.now() + Math.random() }
+    ]);
   }
 
+  function fecharAvisoPersistente(id) {
+    setAvisosPersistentes(prev => prev.filter(a => a.id !== id));
+  }
+
+  function limparAvisosPersistentes() {
+    setAvisosPersistentes([]);
+  }
+
+  // Retorna o estado e as funções para que o seu App.js possa usá-los
+  return {
+    avisosPersistentes,
+    mostrarAvisoPersistente,
+    fecharAvisoPersistente,
+    limparAvisosPersistentes
+  };
+}
+
+export function useMostrarAviso(){
+  const[aviso, setAviso] = useState([]);
+
+  function mostrarAviso(texto){
+    setAviso({texto, id: Date.now()})
+  }
+  return {
+    mostrarAviso,
+  }
+}

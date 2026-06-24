@@ -1286,3 +1286,75 @@ body {
 .botao-estatisticas:active {
   transform: scale(0.95);
 }
+
+
+.container-avisos-flutuantes {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10005; /* Acima até do overlay de estatísticas se necessário */
+  pointer-events: auto;
+}
+
+/* Caixa do aviso estilizada no tema do Buxas Clicker */
+.card-aviso-oculto {
+  background: rgba(28, 17, 36, 0.95); /* Roxo escuro semi-transparente */
+  border: 2px solid #5a2c85; /* Borda roxa padrão */
+  border-left: 5px solid #ff3344; /* Detalhe em vermelho na esquerda */
+  border-radius: 4px;
+  padding: 12px 40px 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  min-width: 250px;
+  max-width: 350px;
+  position: relative;
+  animation: surgirAviso 0.3s ease-out;
+}
+
+.icone-aviso {
+  font-size: 20px;
+}
+
+.texto-aviso {
+  margin: 0;
+  color: #d1cbd4;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+/* Botãozinho de fechar no canto do card */
+.botao-fechar-aviso {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ff3344;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.botao-fechar-aviso:hover {
+  color: #ffffff;
+}
+
+/* Animação suave para o aviso entrar deslizando */
+@keyframes surgirAviso {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

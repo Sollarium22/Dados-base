@@ -92,6 +92,7 @@ export const DEFAULT_CONSTRUCOES = [
       descricao: "Não é das trevas, ele só quer amigos que não reclamem de carregar as malas dele na masmorra.", 
       assin: "- Coveiro terceirizado" 
     },
+    { nome: "Maldito", preco: 0, dps: 0, quantidade: 0, icone: cajado, descricao: "Quem diria que nascer sem paranormal...o tornaria no proprio", assin: "- Nós Somos devido nossas ações."}
     //{ nome: "Lo testador", preco: 10000000000000000, dps: 101000000000, quantidade: 0, icone: dado, descricao:"ABSOLUTA", assin: "SIM"}, 
   ]
 
@@ -322,28 +323,9 @@ export const DEFAULT_DOURADO = [
     duracao: 30, 
     peso: 5
   },
-  {
-    chave: "sorte_grande_sonhos", // Nome único para não sobrescrever
-    nome: "Sonhos lucidos",
-    efeito: "DPS",
-    mult: 77,
-    duracao: 11,
-    peso: 3
-  },
-  {
-    chave: "sorte_grande_odio",  // Nome único para não sobrescrever
-    nome: "Ódio Incontrolavel",
-    efeito: "Click",
-    mult: 777,
-    duracao: 11,
-    peso: 10
-  },
-  {
-    chave: "lucky",
-    nome: "LAZER BEAM",
-    efeito: "Instantaneo",
-    peso: 4
-  }
+  {chave: "sorte_grande_sonhos",nome: "Sonhos lucidos",efeito: "DPS",mult: 77,duracao: 11,peso: 3},
+  {chave: "sorte_grande_odio",nome: "Ódio Incontrolavel",efeito: "Click",mult: 777,duracao: 11,peso: 1},
+  {chave: "lucky",nome: "LAZER BEAM",efeito: "Instantaneo",peso: 4}
 ]
 
 export const DEFAULT_CONQUISTAS = [

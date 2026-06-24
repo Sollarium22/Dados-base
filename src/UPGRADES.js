@@ -1,5 +1,45 @@
 
 
+export function clickPorDps(upgrade, ascensao) {
+  let total = 0;
+
+  total += upgrade.filter(m => m.efeito === 'clickDps' && m.comprado).length * 0.02;
+
+  Object.values(ascensao).forEach(distrito => {
+    if (!distrito?.upgrades) return;
+
+    distrito.upgrades.forEach(u => {
+      if (u.comprado && u.efeito === 'clickDps') {
+        total += 0.01;
+      }
+    });
+  });
+
+  return total;
+}
+
+
+export function calcularValorClick(upgrade, ascensao, dpsTotal, buff) {
+  // 1. Garante que se o dpsTotal vier quebrado ou undefined, ele vire 0 automaticamente
+  const dpsSeguro = dpsTotal || 0;
+
+  const mult_click = upgrade.filter(u => u.efeito === "duplicarClick" && u.comprado).length;
+  const clickBaseFinal = 2 ** mult_click;
+
+  const percentual = clickPorDps(upgrade, ascensao);
+  
+  // 2. Usando a variável segura corrigida
+  const bonusPorDps = dpsSeguro * percentual; 
+
+  const clickSemBuff = clickBaseFinal + bonusPorDps;
+  
+    console.log(percentual)
+  const now = Date.now();
+  const clickBuff = buff.find(b => b.tipo === "Click" && b.expira > now);
+
+  return clickBuff ? clickSemBuff * clickBuff.mult : clickSemBuff;
+}
+
 
 export function atualizarDanoConstrucoes(upgrade, construcoes, danosBases) {
   const mults = {
@@ -55,4 +95,30 @@ export function obterUpgradesDisponiveis(upgrade, construcoes, contagemTotal, as
 
       return true;
     });
+}
+
+
+
+export function processarCompraUpgrade(listaUpgrades, indiceOriginal, contagemAtual) {
+  const itemAlvo = listaUpgrades[indiceOriginal];
+  
+  // Se o jogador não tem contagem suficiente ou o item já foi comprado, cancela
+  if (!itemAlvo || contagemAtual < itemAlvo.preco || itemAlvo.comprado) {
+    return null;
+  }
+
+  
+
+  const novaLista = listaUpgrades.map((u, idx) => {
+    if (idx === indiceOriginal) {
+      return { ...u, comprado: true };
+    }
+    return u;
+  });
+  
+
+  return {
+    novosUpgrades: novaLista,
+    novaContagem: contagemAtual - itemAlvo.preco
+  };
 }

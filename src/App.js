@@ -4,8 +4,17 @@ import { useState, useEffect, useRef, version } from 'react';
 import { motion, PresenceContext, useAnimation } from 'framer-motion';
 import { VERSAO_ATUAL, DEFAULT_SAVE, processarSave } from './Versionamento';
 import { DEFAULT_ASCENSAO, DEFAULT_MELHORIAS, DEFAULT_VINHO, DEFAULT_CONSTRUCOES, DEFAULT_DOURADO, DEFAULT_CONQUISTAS } from './DEFAULT';
-import { b_novato,b_guerreiro,b_mago,b_ladino,b_pugilista,b_bardo,b_paladino,b_druida,b_cacador,b_necromante} from './DEFAULT';
+import { b_novato, b_guerreiro, b_mago, b_ladino, b_pugilista, b_bardo, b_paladino, b_druida, b_cacador, b_necromante } from './DEFAULT';
+import { useAvisosPersistentes, useMostrarAviso, formatarNumero } from './Utilitarios';
+import { obterNovasConquistas, checkConquista } from './CONQUISTAS';
 
+// TESTES
+import {
+  calcularValorClick,
+  atualizarDanoConstrucoes,
+  obterUpgradesDisponiveis,
+  processarCompraUpgrade
+} from './UPGRADES';
 
 // ICONS
 import logo from './logo.svg';
@@ -98,9 +107,6 @@ function App() {
 
 
 
-  const [preco, setPreco] = useState(15);// preco
-
-
   // FUNCAO PARA CALCULAR O PRECO ATUAL DE CADA CONSTRUCAO
 
   function getPrecoAtual(precoBase, quantidade) {
@@ -122,30 +128,8 @@ function App() {
 
   // ==============================AVISOS================================================
 
-  function mostrarAviso(texto) {
-    setAviso({ texto, id: Date.now() })
-  }
-
   // =============================SIMPLIFICADOR DE NUMEROS================================
-  function formatarNumero(num) {
-    if (num < 1000000) return Math.floor(num).toLocaleString('pt-BR'); // Mantém normal até 999.999
-
-    // Sufixos no plural e no singular emparelhados por índice
-    const sufixosPlural = ["", " Mil", " Milhões", " Bilhões", " Trilhões", " Quatrilhões", " Quintilhões", " Sextilhões"];
-    const sufixosSingular = ["", " Mil", " Milhão", " Bilhão", " Trilhão", " Quatrilhão", " Quintilhão", " Sextilhão"];
-
-    // Encontra a "casa" do número (2 = milhão, 3 = bilhão, etc.)
-    const i = Math.floor(Math.log10(num) / 3);
-
-    // Calcula o valor reduzido (ex: 1.250.000 vira 1.25)
-    const valorReduzido = num / Math.pow(10, i * 3);
-
-    // Se a parte inteira do número for exatamente 1, usa o singular. Caso contrário, plural.
-    const sufixoCorreto = Math.floor(valorReduzido) === 1 ? sufixosSingular[i] : sufixosPlural[i];
-
-    // Retorna com 3 casas decimais e o sufixo correto
-    return valorReduzido.toFixed(3) + sufixoCorreto;
-  }
+  
 
   // ============================MINIGAMES==================================
   const [vinho, setVinho] = useState(DEFAULT_VINHO)
@@ -173,15 +157,13 @@ function App() {
   const [telaAtual, setTelaAtual] = useState("jogo"); //Telas: jogo, ascensao, pilares, conquistas,
 
   useEffect(() => {
-    const pilar = construcoes.find(c => c.nome === "Pugilista");
-    if (pilar && pilar.quantidade >= 1) {
+    const pilar = contagem;
+    if (pilar && pilar >= 1_000_000_000) {
       setAscensao(prev =>
         prev.desbloqueado ? prev : { ...prev, desbloqueado: true }
-
       );
-
     }
-  }, [construcoes])
+  })
 
 
   //------------------------------------------------------------------------------------------
@@ -190,8 +172,13 @@ function App() {
   const [HistoricoVinho, setHistoricoVinho] = useState([]);
 
   function contarDado() {
-    setContagem((anterior) => anterior + clickRef.current);
-    setContagemTotal((anterior) => anterior + clickRef.current);
+    const valorDoCliqueSeguro = Number(click) && !isNaN(click) ? click : 1;
+
+    setContagem((atual) => atual + valorDoCliqueSeguro);
+    setContagemTotal((atual) => atual + valorDoCliqueSeguro);
+
+    // setContagem((anterior) => anterior + clickRef.current);
+    // setContagemTotal((anterior) => anterior + clickRef.current);
 
   }
 
@@ -241,7 +228,6 @@ function App() {
     }
   }, [])
 
-
   //PERIODICO
   useEffect(() => {
     const autoSave = setInterval(() => {
@@ -262,7 +248,6 @@ function App() {
     }, 60000);
     return () => clearInterval(autoSave);
   }, []);
-
 
   function exportarSave() {
     const saveData = {
@@ -415,88 +400,22 @@ function App() {
 
   // =====================================EFEITO DE UPGRADES/COMPRAS==========================================
 
-  //CLICK DPS
-
-  function clickPorDps(upgrade, ascensao) {
-    let total = 0;
-
-    total += upgrade.filter(m => m.efeito === 'clickDps' && m.comprado).length * 0.02;
-
-    Object.values(ascensao).forEach(distrito => {
-      if (!distrito?.upgrades) return;
-
-      distrito.upgrades.forEach(u => {
-        if (u.comprado && u.efeito === 'clickDps') {
-          total += 0.01;
-        }
-      })
-    })
-
-    return total;
-  }
-
+  
   //USEFECT DE UPGRADES
   useEffect(() => {
 
-    //Multiplicadores comparar quantos tem
-    const mult_click = upgrade.filter(u => u.efeito === "duplicarClick" && u.comprado).length;
-    const clickBaseFinal = 2 ** mult_click
-
-
-    // calculo de multiplicador
-    const percentual = clickPorDps(upgrade, ascensao);
-    const bonusPorDps = DPS * percentual;
-
-    const clickSemBuff = clickBaseFinal + bonusPorDps
-
-    //TALVEZ...MULTIPLIQUE NO LUGAR DE SOMAR
-
-    const now = Date.now();
-    const clickBuff = buff.find(b => b.tipo === "Click" && b.expira > now);
-
-
-    const clickFinal = clickBuff ? clickSemBuff * clickBuff.mult : clickSemBuff;
-
-
-    setClick(clickFinal);
-
-
-    //DUPLICA PRIMEIRA CONSTRUCAO
-
-    const mults = {
-    "Novato": upgrade.filter(u => u.efeito === "duplicarDado" && u.comprado).length,
-    "Guerreiro": upgrade.filter(u => u.efeito === "duplicarGuerreiro" && u.comprado).length,
-    "Ladino": upgrade.filter(u => u.efeito === "duplicarLadino" && u.comprado).length,
-    "Bardo": upgrade.filter(u => u.efeito === "duplicarBardo" && u.comprado).length,
-    "Paladino": upgrade.filter(u => u.efeito === "duplicarPaladino" && u.comprado).length,
-    "Druida": upgrade.filter(u => u.efeito === "duplicarDruida" && u.comprado).length,
-    "Caçador": upgrade.filter(u => u.efeito === "duplicarCacador" && u.comprado).length,
-    "Necromante": upgrade.filter(u => u.efeito === "duplicarNecromante" && u.comprado).length,
-    };
-
     const danosBases = {
-    "Novato": b_novato,
-    "Guerreiro": b_guerreiro,
-    "Ladino": b_ladino,
-    "Bardo": b_bardo,
-    "Paladino": b_paladino,
-    "Druida": b_druida,
-    "Caçador": b_cacador,
-    "Necromante": b_necromante
+      "Novato": b_novato, "Guerreiro": b_guerreiro, "Ladino": b_ladino,
+      "Bardo": b_bardo, "Paladino": b_paladino, "Druida": b_druida,
+      "Caçador": b_cacador, "Necromante": b_necromante
     };
 
+    const clickCalculado = calcularValorClick(upgrade, ascensao, DPS, buff);
+    setClick(clickCalculado);
 
-     setConstrucoes((anterior) =>
-    anterior.map((c) => {
-      if (mults[c.nome] !== undefined) {
-        const dpsBaseOriginal = danosBases[c.nome] || 0;
-        const dpsCalculado = dpsBaseOriginal * (2 ** mults[c.nome]);
-        
-        return { ...c, dps: dpsCalculado };
-      }
-      return c;
-    })
-  );
+    setConstrucoes((anterior) => atualizarDanoConstrucoes(upgrade, anterior, danosBases));
+
+
 
   }, [upgrade, DPS, buff])
 
@@ -524,23 +443,21 @@ function App() {
 
   // TEMPO DO JOGO E CONSTRUCOES
   useEffect(() => {
-
     let lastUpdate = Date.now();
 
-
     const timer = setInterval(() => {
-
       const now = Date.now();
       const deltaSeconds = (now - lastUpdate) / 1000;
-
       lastUpdate = now;
 
+      // CORREÇÃO 2: Garante que se c.dps não existir, o código use o dano base padrão para não gerar undefined
       const producaoBase = construcoes.reduce((soma, c) => {
-        const quantidadeTotal = c.quantidade + (c.quantidadeGratis || 0)
-        return soma + dpsConstrucao(c) * quantidadeTotal;
+        const quantidadeTotal = c.quantidade + (c.quantidadeGratis || 0);
+        const dpsRealDaConstrucao = Number(c.dps) || 0; // Alinhado com o dps dinâmico que o UPGRADES.js gera
+        return soma + (dpsRealDaConstrucao * quantidadeTotal);
       }, 0);
 
-      //Multiplicadores de por cento
+      // Multiplicadores de por cento
       const multiplicador1Porcento = upgrade.filter(u => u.efeito === "1porcento" && u.comprado).length;
       const multiplicador2Porcento = upgrade.filter(u => u.efeito === "2porcento" && u.comprado).length;
       const multiplicador5Porcento = upgrade.filter(u => u.efeito === "5porcento" && u.comprado).length;
@@ -548,39 +465,54 @@ function App() {
 
       const multiplicadorBasico = 1 + multiplicador1Porcento * 0.01 + multiplicador2Porcento * 0.02 + multiplicador5Porcento * 0.05 + multiplicador10Porcento * 0.10;
 
-
+      // CORREÇÃO 1: Checa o tamanho do array (.length > 0) e valida se prestigioTotal é um número válido
       const dspAscensaoAtivo = ascensao.distritoBase.upgrades.filter(u => u.efeito === "ascensaodps" && u.comprado);
-      // O ? é a simplificacao do if Else, IF - ?, Else - :
       const multiplicadorPrestigio = dspAscensaoAtivo ? 1 + ascensao.prestigioTotal * 0.01 : 1
+
+
 
       const producao = DPSBuffado(producaoBase * multiplicadorBasico * multiplicadorPrestigio, buff);
 
+      // SEGURO: Se por qualquer motivo a produção virar NaN, mude para 0 para não quebrar o texto da tela
+      const producaoSegura = Number(producao) && !isNaN(producao) ? producao : 0;
 
+      setDps(producaoSegura);
 
-      setDps(producao);
-      setContagem((atual) => atual + (deltaSeconds * producao));
-      setContagemTotal((atual) => atual + (deltaSeconds * producao));
-    }, 100); //a cada 1 segundo roda aqui
-    return () => clearInterval(timer);//limpa o timer
-  }, [construcoes, upgrade, buff]);
-
-
-  function comprarUpgrade(indice) {
-    setUpgrade((anterior) => {
-      const novo = anterior.map((u, i) => {
-        if (contagem >= u.preco && i === indice && !u.comprado) {
-          setContagem(contagem - u.preco);
-
-          return {
-            ...u,
-            comprado: true
-          };
-        }
-        return u;
+      setContagem((atual) => {
+        // Se o estado atual já estiver corrompido com NaN do passado, força voltar para 0
+        const atualSeguro = isNaN(atual) ? 0 : atual;
+        return atualSeguro + (deltaSeconds * producaoSegura);
       });
-      return novo
+
+      setContagemTotal((atual) => {
+        const atualSeguro = isNaN(atual) ? 0 : atual;
+        return atualSeguro + (deltaSeconds * producaoSegura);
+      });
+    }, 100);
+
+    return () => clearInterval(timer);
+  }, [construcoes, upgrade, buff, ascensao]);
+
+
+  function comprarUpgrade(indiceOriginal) {
+    // 1. Usamos o callback (atual) para garantir o valor mais real da contagem no momento exato do clique
+    setContagem((contagemAtual) => {
+
+      // Executa a validação do arquivo UPGRADES.js passando o valor mais recente
+      const resultado = processarCompraUpgrade(upgrade, indiceOriginal, contagemAtual);
+
+      if (resultado) {
+        // 2. Se a compra for válida, atualiza os upgrades e retorna o saldo deduzido
+        setUpgrade(resultado.novosUpgrades);
+        return resultado.novaContagem;
+      }
+
+      // 3. Se não tiver saldo ou o upgrade já foi comprado, mantém a contagem exatamente como estava
+      return contagemAtual;
     });
-  };
+  }
+
+  const listaExibicaoLoja = obterUpgradesDisponiveis(upgrade, construcoes, contagemTotal, ascensao);
 
   //FUNCAO DE COMPRAR CONSTRUCAO
   function comprarConstrucao(indice) {
@@ -749,9 +681,9 @@ function App() {
     )
   }
 
-  // ASCENCAO PARTE 2
+  // ========================ASCENCAO PARTE 2=========================
 
-  const PRIMEIRO_PRESTIGIO = 1_000_000;
+  const PRIMEIRO_PRESTIGIO = 1_000_000_000;
 
   function calcularPrestigio(c) {
     return Math.floor(Math.sqrt(c / PRIMEIRO_PRESTIGIO));
@@ -776,6 +708,7 @@ function App() {
     setConstrucoes(DEFAULT_CONSTRUCOES);
     setUpgrade(DEFAULT_MELHORIAS);
     setVinho(DEFAULT_VINHO)
+
 
     setAscensao(prev => ({
       ...prev,
@@ -810,56 +743,6 @@ function App() {
     });
   }
 
-  //================================== BASE DE UPGRADES ==================
-
-  const contagemDado = construcoes.find((c) => c.nome === "Novato")?.quantidade || 0;
-  const qtdGuerreiro = construcoes.find((c) => c.nome === "Guerreiro")?.quantidade || 0;
-  const qtdLadino = construcoes.find((c) => c.nome === "Ladino")?.quantidade || 0;
-  const qtdBardo = construcoes.find((c) => c.nome === "Bardo")?.quantidade || 0;
-  const qtdPaladino = construcoes.find((c) => c.nome === "Paladino")?.quantidade || 0;
-  const qtdDruida = construcoes.find((c) => c.nome === "Druida")?.quantidade || 0;
-  const qtdCacador = construcoes.find((c) => c.nome === "Caçador")?.quantidade || 0;
-  const qtdNecromante = construcoes.find((c) => c.nome === "Necromante")?.quantidade || 0;
-
-
-  //APARECER UPRGADES
-  const upgradeDisponiveis = upgrade.
-    map((u, i) => ({ ...u, indiceOriginal: i }))
-    .filter(u => {
-      if (u.comprado) return false;
-
-      if (u.id === "click1" && contagemTotal < 10) return false;
-      if (u.id === "dados1" && contagemDado < 1) return false;
-      if (u.id === "dados2" && contagemDado < 10) return false;
-
-      //GUERREIRO
-      if (u.id === "guerreiro1" && qtdGuerreiro < 10) return false;
-
-      //LADINO
-      if (u.id === "up_ladino1" && qtdLadino < 10) return false;
-      //BARDO
-      if (u.id === "up_bardo1" && qtdBardo < 10) return false;
-      //PALADINO
-      if (u.id === "up_paladino1" && qtdPaladino < 10) return false;
-      //DRUIDA
-      if (u.id === "up_druida1" && qtdDruida < 10) return false;
-      //CAÇADOR
-      if (u.id === "up_cacador1" && qtdCacador < 10) return false;
-      //NECROMANTE
-      if (u.id === "up_necro1" && qtdNecromante < 10) return false;
-
-      const caixaRayboomAtivo = ascensao.distritoRayboom.upgrades.some(up => up.id === "rayboom1" && up.comprado);
-
-
-      // Se o upgrade atual for o "Cores" (contagemRay1) e a flor estiver comprada, ele some da lista
-      if (u.id === "contagemRay1" && !caixaRayboomAtivo) return false;
-
-
-      return true;
-    });
-
-  //lista de comprados:
-  const upgradeComprados = upgrade.filter((u) => u.comprado)
 
   //=================ANIMACAO DADO=========================
   const controls = useAnimation();
@@ -883,57 +766,43 @@ function App() {
     }, 1000) // define para eles ficarem por 1 segundo
   };
 
-  //================AVISO PERSISTENTE ====================
+  //================AVISOS ====================
 
-  const [avisosPersistentes, setAvisosPersistentes] = useState([]);
+  const {
+    avisosPersistentes,
+    mostrarAvisoPersistente,
+    fecharAvisoPersistente,
+    limparAvisosPersistentes
+  } = useAvisosPersistentes();
 
-  function mostrarAvisoPersistentes(texto, icone = null) {
-    setAvisosPersistentes(prev => [...prev, { texto, icone, id: Date.now() + Math.random() }]);
-  }
-
-  function fecharAvisoPersistente(id) {
-    setAvisosPersistentes(prev => prev.filter(a => a.id !== id));
-  }
-
-  function limparAvisosPersistentes() {
-    setAvisosPersistentes([]);
-  }
+  const {
+    mostrarAviso
+  } = useMostrarAviso();
 
   //===================CONQUISTAS=============================
 
+  // MONITOR ÚNICO DE CONQUISTAS E NOTIFICAÇÕES
   useEffect(() => {
-    const estado = { contagemTotal, DPS, construcoes, click }
+    // 1. Monta o objeto com os estados atuais do jogo (certifique-se se usa dps ou DPS no seu state)
+    const estado = { contagemTotal, DPS: DPS, construcoes, click };
 
-    const novasConquistas = conquistas.filter(c => !c.obtido && checkConquista(c, estado))
+    // 2. Filtra apenas as conquistas que o jogador acabou de ganhar neste milissegundo
+    const novasConquistas = conquistas.filter(c => !c.obtido && checkConquista(c, estado));
 
     if (novasConquistas.length === 0) return;
 
+    // 3. Dispara os alertas na tela com o título e o ícone de troféu
     novasConquistas.forEach(c => {
-      mostrarAvisoPersistentes(`Nova conquista ${c.nome}`)
-    })
+      mostrarAvisoPersistente(`Conquista Desbloqueada: ${c.nome}`, "🏆");
+    });
 
+    // 4. Salva de forma permanente no estado mudando obtido para true
     const idsObtidos = new Set(novasConquistas.map(c => c.id));
     setConquistas(prev => prev.map(c =>
-      idsObtidos.has(c.id) ? { ...c, obtido: true } : c));
+      idsObtidos.has(c.id) ? { ...c, obtido: true } : c
+    ));
 
-  }, [contagemTotal, DPS])
-
-  function checkConquista(conquista, state) {
-    if (conquista.check) return conquista.check(state);
-
-    switch (conquista.tipo) {
-      case 'contagemTotal':
-        return state.contagemTotal >= conquista.quantidade;
-      case 'dps':
-        return state.DPS >= conquista.quantidade;
-      case 'construcao':
-        return (state.construcoes?.find(c => c.nome === conquista.parametro?.nome)?.quantidade ?? 0) >= conquista.quantidade;
-      case 'valorClick':
-        return state.click >= conquista.quantidade;
-      default:
-        return false;
-    }
-  }
+  }, [contagemTotal, DPS, construcoes, click]); 
 
   // =============================================HTML=========================================
   return (
@@ -942,14 +811,24 @@ function App() {
       {/* AVISOS PERSISTENTES */}
 
       <div
-        style={{ position: "fixed", left: 0, right: 0, bottom: 0, padding: "10px 0", display: "flex", flexDirection: "column-reverse", alignItems: "center", gap: "8px", zIndex: 9998, pointerEvents: "none" }}
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 20, /* Subi um pouco para desgrudar do rodapé */
+          display: "flex",
+          flexDirection: "column-reverse",
+          alignItems: "center",
+          gap: "10px",
+          zIndex: 9998,
+          pointerEvents: "none"
+        }}
       >
         {(() => {
-          // Mostra só os 3 mais antigos. Os novos esperam na fila; fechar um dos visíveis revela o próximo. Nunca some sem ser visto.
           const MAX_VISIVEIS = 3;
           const visiveis = avisosPersistentes.slice(0, MAX_VISIVEIS);
           const esperando = avisosPersistentes.length - visiveis.length;
-          // Botão aparece quando há 2+ avisos OU há fila esperando.
+
           return (
             <>
               {visiveis.map(a => (
@@ -957,22 +836,46 @@ function App() {
                   key={a.id}
                   onClick={() => fecharAvisoPersistente(a.id)}
                   style={{
-                    pointerEvents: "auto", background: "rgba(0, 0, 0, 0.85)", color: "#a964e2", border: "2px solid #a964e2", borderRadius: "8px", padding: "12px 40px 12px 16px",
-                    fontSize: "15px",
+                    pointerEvents: "auto",
+                    background: "rgba(28, 17, 36, 0.95)", /* Roxo escuro ocultista */
+                    color: "#d1cbd4", /* Texto claro padrão do CSS */
+                    fontFamily: "'Georgia', 'Times New Roman', serif",
+
+                    /* Borda roxa com um detalhe vermelho imitando o corte do dado */
+                    border: "2px solid #5a2c85",
+                    borderLeft: "6px solid #ff3344",
+                    borderRadius: "4px",
+
+                    padding: "12px 40px 12px 18px",
+                    fontSize: "14px",
                     fontWeight: "bold",
                     cursor: "pointer",
                     maxWidth: "600px",
+                    minWidth: "300px",
                     position: "relative",
-                    boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+
+                    /* Sombra projetada pesada com brilho místico */
+                    boxShadow: "0 4px 15px rgba(0, 0, 0, 0.7), 0 0 10px rgba(160, 78, 246, 0.1)",
                     display: "flex",
                     alignItems: "center",
                     gap: "14px",
+                    letterSpacing: "0.5px"
                   }}
                   title="Clique para fechar"
                 >
-                  {a.icone}
+                  {a.icone && <span style={{ fontSize: "18px" }}>{a.icone}</span>}
                   <span>{a.texto}</span>
-                  <span style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", fontSize: "18px", color: "#aaa" }}>×</span>
+
+                  {/* O '✕' de fechar agora usa o vermelho do dado */}
+                  <span style={{
+                    position: "absolute",
+                    right: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    fontSize: "18px",
+                    color: "#ff3344",
+                    fontWeight: "bold"
+                  }}>✕</span>
                 </div>
               ))}
 
@@ -981,20 +884,26 @@ function App() {
                   onClick={limparAvisosPersistentes}
                   style={{
                     pointerEvents: "auto",
-                    background: "rgba(0, 0, 0, 0.85)",
-                    color: "#fff",
-                    border: "2px solid #888",
-                    borderRadius: "6px",
+                    background: "#0e0a12", /* Fundo idêntico ao botão de estatísticas */
+                    color: "#d1cbd4",
+                    fontFamily: "'Georgia', 'Times New Roman', serif",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+
+                    border: "2px solid #5a2c85",
+                    borderRadius: "4px",
                     padding: "6px 14px",
-                    fontSize: "13px",
+                    fontSize: "12px",
                     fontWeight: "bold",
                     cursor: "pointer",
-                    boxShadow: "0 0 8px rgba(0,0,0,0.4)",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.6)",
+                    transition: "all 0.2s ease"
                   }}
-                  title="Fecha todos os avisos"
+                  // Efeito visual simulado de hover via título para guiar o jogador
+                  title="Limpa todas as notificações ativas"
                 >
                   {esperando > 0
-                    ? `Limpar notificações, +${esperando} na fila`
+                    ? `Limpar notificações (+${esperando} na fila)`
                     : `Limpar notificações`}
                 </button>
               )}
@@ -1058,6 +967,7 @@ function App() {
           <img src={ritual1} style={{ height: "150px", width: "150px" }} />
         </div>
       )}
+
       {telaAtual !== "pilares" && (
         <div className="jogo">
           <div class="lado-esquerdo">
@@ -1082,27 +992,15 @@ function App() {
 
                   <h2>Conquistas</h2>
                   <div className="grade-conquistas">
-                    {DEFAULT_CONQUISTAS.map((conquista) => {
-
-                      // Criamos um objeto temporário idêntico ao que a função espera receber
-                      const jogoState = {
-                        click: click,
-                        contagemTotal: contagemTotal,
-                        DPS: DPS,
-                        construcoes: construcoes
-                      };
-
-                      // Passamos esse objeto montado para a checagem funcionar perfeitamente
-                      const desbloqueada = checkConquista(conquista, jogoState);
+                    {conquistas.map((conquista) => {
+                      // Uma conquista é considerada ganha se ela já foi salva como TRUE no estado
+                      const desbloqueada = conquista.obtido;
 
                       return (
                         <div
                           key={conquista.id}
                           className={`quadrado-conquista ${desbloqueada ? 'desbloqueado' : ''}`}
-                          title={desbloqueada
-                            ? `${conquista.nome} - ${conquista.descricao}`
-                            : "Conquista Oculta (Bloqueada)"
-                          }
+                          title={desbloqueada ? `${conquista.nome} - ${conquista.descricao}` : "Bloqueado"}
                         >
                           <span style={{ fontSize: '22px' }}>{desbloqueada ? "👁️" : "🔒"}</span>
                         </div>
@@ -1182,7 +1080,7 @@ function App() {
             {telaAtual === "ascensao" && (
               <div className='secao-ascensao'>
                 <h2>Pilares da Criação</h2>
-                <p> Os pilares observam </p>
+                <p> Os pilares observaam </p>
 
 
                 <button className='portao-ascensao'
@@ -1297,7 +1195,7 @@ function App() {
 
               <div className="secao-upgrade">
                 <h2>Upgrades</h2>
-                {upgradeDisponiveis.map((u, i) => (
+                {listaExibicaoLoja.map((u, i) => (
                   <button
                     key={i}
                     className="botao-upgrade"
